@@ -1,0 +1,219 @@
+import initSqlJs from 'sql.js';
+
+let SQLPromise = null;
+
+/**
+ * Initializes and returns the cached sql.js SQL instance.
+ * Loads the WebAssembly binary from CDN to prevent Vite bundler asset path issues.
+ */
+export async function getSqlInstance() {
+  if (!SQLPromise) {
+    SQLPromise = initSqlJs({
+      locateFile: (file) => `https://sql.js.org/dist/${file}`,
+    });
+  }
+  return await SQLPromise;
+}
+
+/**
+ * Helper to deep compare two result sets (student vs expected)
+ */
+function areResultsEqual(studentOutput, expectedOutput) {
+  if (!studentOutput || !expectedOutput) return false;
+  
+  // Compare row counts
+  if (studentOutput.values.length !== expectedOutput.values.length) {
+    return false;
+  }
+
+  // Compare column counts
+  if (studentOutput.columns.length !== expectedOutput.columns.length) {
+    return false;
+  }
+
+  // Compare values row by row
+  for (let i = 0; i < expectedOutput.values.length; i++) {
+    const expectedRow = expectedOutput.values[i];
+    const studentRow = studentOutput.values[i];
+
+    if (expectedRow.length !== studentRow.length) return false;
+
+    for (let j = 0; j < expectedRow.length; j++) {
+      const expVal = expectedRow[j];
+      const stuVal = studentRow[j];
+
+      // Handle nulls and numeric conversions
+      if (expVal === null && stuVal !== null) return false;
+      if (expVal !== null && stuVal === null) return false;
+      if (String(expVal).trim() !== String(stuVal).trim()) return false;
+    }
+  }
+
+  return true;
+}
+
+/**
+ * Executes student query alongside solution query for auto-grading
+ */
+export async function executeChallenge({ initSql, studentQuery, solutionQuery }) {
+  const startTime = performance.now();
+  let db = null;
+
+  try {
+    const SQL = await getSqlInstance();
+    db = new SQL.Database();
+
+    // 1. Build schema & insert seed rows
+    if (initSql && initSql.trim()) {
+      db.exec(initSql);
+    }
+
+    // 2. Execute solution query to get expected ground-truth output
+    let expectedOutput = { columns: [], values: [] };
+    if (solutionQuery && solutionQuery.trim()) {
+      const solutionRes = db.exec(solutionQuery);
+      if (solutionRes && solutionRes.length > 0) {
+        expectedOutput = {
+          columns: solutionRes[0].columns || [],
+          values: solutionRes[0].values || [],
+        };
+      }
+    }
+
+    // 3. Execute student query
+    let studentOutput = { columns: [], values: [] };
+    if (!studentQuery || !studentQuery.trim()) {
+      throw new Error('Please enter a SQL query before running.');
+    }
+
+    const studentRes = db.exec(studentQuery);
+    if (studentRes && studentRes.length > 0) {
+      studentOutput = {
+        columns: studentRes[0].columns || [],
+        values: studentRes[0].values || [],
+      };
+    }
+
+    // 4. Compare outputs
+    const isCorrect = areResultsEqual(studentOutput, expectedOutput);
+    const executionTimeMs = Math.round((performance.now() - startTime) * 100) / 100;
+
+    return {
+      isCorrect,
+      studentOutput,
+      expectedOutput,
+      error: null,
+      executionTimeMs,
+    };
+  } catch (err) {
+    const executionTimeMs = Math.round((performance.now() - startTime) * 100) / 100;
+    return {
+      isCorrect: false,
+      studentOutput: { columns: [], values: [] },
+      expectedOutput: { columns: [], values: [] },
+      error: err.message || 'Unknown SQL execution error.',
+      executionTimeMs,
+    };
+  } finally {
+    if (db) {
+      try {
+        db.close();
+      } catch (e) {
+        console.warn('Error closing SQLite in-memory instance:', e);
+      }
+    }
+  }
+}
+
+/**
+ * Dry-run a student query without comparison against solution
+ */
+export async function executeDryRun({ initSql, studentQuery }) {
+  const startTime = performance.now();
+  let db = null;
+
+  try {
+    const SQL = await getSqlInstance();
+    db = new SQL.Database();
+
+    if (initSql && initSql.trim()) {
+      db.exec(initSql);
+    }
+
+    if (!studentQuery || !studentQuery.trim()) {
+      throw new Error('Please enter a SQL query before running.');
+    }
+
+    const studentRes = db.exec(studentQuery);
+    const studentOutput = studentRes && studentRes.length > 0
+      ? { columns: studentRes[0].columns || [], values: studentRes[0].values || [] }
+      : { columns: [], values: [] };
+
+    const executionTimeMs = Math.round((performance.now() - startTime) * 100) / 100;
+
+    return {
+      studentOutput,
+      error: null,
+      executionTimeMs,
+    };
+  } catch (err) {
+    const executionTimeMs = Math.round((performance.now() - startTime) * 100) / 100;
+    return {
+      studentOutput: { columns: [], values: [] },
+      error: err.message || 'Unknown SQL execution error.',
+      executionTimeMs,
+    };
+  } finally {
+    if (db) {
+      try {
+        db.close();
+      } catch (e) {
+        console.warn('Error closing SQLite in-memory instance:', e);
+      }
+    }
+  }
+}
+
+/**
+ * Inspects the schema generated by initSql to dynamically return table name, columns, and sample rows.
+ */
+export async function inspectSchema(initSql) {
+  if (!initSql || !initSql.trim()) return null;
+  let db = null;
+  try {
+    const SQL = await getSqlInstance();
+    db = new SQL.Database();
+    db.exec(initSql);
+
+    const tablesRes = db.exec("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';");
+    if (!tablesRes || tablesRes.length === 0 || !tablesRes[0].values.length) {
+      return null;
+    }
+
+    const tableName = tablesRes[0].values[0][0];
+    const columnsRes = db.exec(`PRAGMA table_info("${tableName}");`);
+    const columns = columnsRes && columnsRes.length > 0
+      ? columnsRes[0].values.map(col => `${col[1]} (${col[2] || 'TEXT'})`)
+      : [];
+
+    const rowsRes = db.exec(`SELECT * FROM "${tableName}" LIMIT 6;`);
+    const sampleRows = rowsRes && rowsRes.length > 0 ? rowsRes[0].values : [];
+
+    return {
+      tableName,
+      columns,
+      sampleRows,
+    };
+  } catch (err) {
+    console.warn('Could not inspect schema from initSql:', err);
+    return null;
+  } finally {
+    if (db) {
+      try {
+        db.close();
+      } catch (e) {
+        console.warn('Error closing SQLite in-memory instance:', e);
+      }
+    }
+  }
+}
