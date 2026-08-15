@@ -34,7 +34,6 @@ const StudentLayout = () => {
 
   const studentNavLinks = [
     { name: 'Dashboard', path: '/student/dashboard', icon: LayoutDashboard },
-    { name: 'Tracks', path: '/student/tracks', icon: Layers },
     { name: '21-Day Contest', path: '/student/contest', icon: Calendar, highlight: true },
     { name: 'Leaderboard', path: '/student/leaderboard', icon: Trophy },
   ];

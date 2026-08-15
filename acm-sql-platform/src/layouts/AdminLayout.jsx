@@ -14,7 +14,8 @@ import {
   Terminal, 
   ArrowLeft,
   ChevronRight,
-  Database
+  Database,
+  Trophy
 } from 'lucide-react';
 
 const AdminLayout = () => {
@@ -31,16 +32,15 @@ const AdminLayout = () => {
     { name: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
     { name: '21-Day Challenges', path: '/admin/challenges', icon: Terminal },
     { name: 'Quizzes & MCQs', path: '/admin/quizzes', icon: HelpCircle },
-    { name: 'Curriculum Tracks', path: '/admin/tracks', icon: Layers },
-    { name: 'Learning Topics', path: '/admin/topics', icon: BookOpen },
+    { name: '🏆 Leaderboard', path: '/admin/leaderboard', icon: Trophy },
     { name: 'Students & Roles', path: '/admin/students', icon: Users },
   ];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col lg:flex-row font-sans selection:bg-rose-500 selection:text-white">
+    <div className="flex h-screen overflow-hidden bg-slate-950 text-slate-100 flex-col lg:flex-row font-sans selection:bg-rose-500 selection:text-white">
       
       {/* Mobile Top Header */}
-      <header className="lg:hidden bg-slate-900 border-b border-slate-800 px-4 py-3 flex items-center justify-between z-40">
+      <header className="lg:hidden bg-slate-900 border-b border-slate-800 px-4 py-3 flex items-center justify-between z-40 shrink-0">
         <div className="flex items-center space-x-2.5">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-rose-600 to-indigo-600 flex items-center justify-center text-white shadow-md">
             <ShieldCheck className="w-4 h-4" />
@@ -56,13 +56,13 @@ const AdminLayout = () => {
         </button>
       </header>
 
-      {/* Left Sidebar Navigation (Desktop Fixed / Mobile Slide-over) */}
+      {/* Left Sidebar Navigation (Fixed height, independent scroll if needed) */}
       <aside className={`
         fixed inset-y-0 left-0 z-50 w-72 bg-slate-900/95 lg:bg-slate-900/80 border-r border-slate-800/90 backdrop-blur-xl p-5 flex flex-col justify-between transition-transform duration-300
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-        lg:static lg:w-64 xl:w-72 shrink-0
+        lg:static lg:w-64 xl:w-72 lg:h-full shrink-0 flex-shrink-0
       `}>
-        <div className="space-y-6">
+        <div className="space-y-6 overflow-y-auto flex-1 pr-1">
           
           {/* Sidebar Top Brand Header */}
           <div className="flex items-center justify-between pb-4 border-b border-slate-800">
@@ -116,7 +116,7 @@ const AdminLayout = () => {
         </div>
 
         {/* Sidebar Footer: Admin Profile & Logout */}
-        <div className="pt-4 border-t border-slate-800 space-y-3">
+        <div className="pt-4 border-t border-slate-800 space-y-3 shrink-0">
           <div className="flex items-center space-x-3 px-2 py-2 rounded-xl bg-slate-950/80 border border-slate-800">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-rose-500 to-indigo-600 flex items-center justify-center text-white font-black text-xs shadow-md shrink-0">
               {(profile?.name || profile?.full_name || 'Admin').charAt(0).toUpperCase()}
@@ -144,11 +144,11 @@ const AdminLayout = () => {
         </div>
       </aside>
 
-      {/* Main Admin Workspace Panel */}
-      <div className="flex-1 flex flex-col min-w-0">
+      {/* Main Admin Workspace Panel (Independently scrolling) */}
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         
         {/* Admin Top Header Banner */}
-        <header className="hidden lg:flex items-center justify-between bg-slate-900/60 border-b border-slate-800 px-8 py-3.5 backdrop-blur-md">
+        <header className="hidden lg:flex items-center justify-between bg-slate-900/60 border-b border-slate-800 px-8 py-3.5 backdrop-blur-md shrink-0">
           <div className="flex items-center space-x-2 text-xs text-slate-400">
             <span className="text-rose-400 font-bold uppercase tracking-wider">ACM Chapter</span>
             <span>/</span>
@@ -164,7 +164,7 @@ const AdminLayout = () => {
         </header>
 
         {/* Main Content Area */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto relative">
           <Outlet />
         </main>
       </div>

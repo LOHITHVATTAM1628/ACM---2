@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { 
   Terminal, 
-  Layers, 
   Users, 
   HelpCircle, 
   Trophy, 
@@ -20,9 +19,8 @@ import {
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
     challengesCount: 0,
-    tracksCount: 0,
     studentsCount: 0,
-    topicsCount: 0,
+    quizzesCount: 0,
   });
   const [loading, setLoading] = useState(true);
   const [recentChallenges, setRecentChallenges] = useState([]);
@@ -32,31 +30,29 @@ const AdminDashboard = () => {
       setLoading(true);
       try {
         // Fetch challenges count & recent
-        const { data: challengesData } = await supabase
+        const { data: challengesData, count: challengesTotal } = await supabase
           .from('challenges')
-          .select('id, day_number, title, difficulty, points')
+          .select('id, day_number, title, difficulty, points', { count: 'exact' })
           .order('day_number', { ascending: true });
-
-        // Fetch tracks count
-        const { data: tracksData } = await supabase
-          .from('tracks')
-          .select('id');
 
         // Fetch students count
         const { data: profilesData } = await supabase
           .from('profiles')
           .select('id, role');
 
-        // Fetch topics count
-        const { data: topicsData } = await supabase
-          .from('topics')
-          .select('id');
+        // Fetch MCQ count from quiz_questions table
+        const { count: mcqCount, error: mcqError } = await supabase
+          .from('quiz_questions')
+          .select('*', { count: 'exact', head: true });
+
+        if (mcqError) {
+          console.error("Error fetching MCQ count:", mcqError);
+        }
 
         setStats({
-          challengesCount: challengesData?.length || 0,
-          tracksCount: tracksData?.length || 0,
+          challengesCount: challengesTotal ?? (challengesData?.length || 0),
           studentsCount: profilesData?.filter(p => p.role !== 'admin').length || 0,
-          topicsCount: topicsData?.length || 0,
+          quizzesCount: mcqCount || 0,
         });
 
         setRecentChallenges(challengesData?.slice(0, 5) || []);
@@ -80,12 +76,12 @@ const AdminDashboard = () => {
       link: '/admin/challenges' 
     },
     { 
-      title: 'Curriculum Tracks', 
-      value: stats.tracksCount, 
-      sub: `${stats.topicsCount} learning topics published`, 
-      icon: Layers, 
-      color: 'indigo', 
-      link: '/admin/tracks' 
+      title: 'Quizzes & MCQs', 
+      value: stats.quizzesCount, 
+      sub: 'Interactive knowledge checks', 
+      icon: HelpCircle, 
+      color: 'emerald', 
+      link: '/admin/quizzes' 
     },
     { 
       title: 'Registered Students', 
@@ -94,14 +90,6 @@ const AdminDashboard = () => {
       icon: Users, 
       color: 'cyan', 
       link: '/admin/students' 
-    },
-    { 
-      title: 'Quizzes & Evaluations', 
-      value: stats.topicsCount, 
-      sub: 'Interactive knowledge checks', 
-      icon: HelpCircle, 
-      color: 'emerald', 
-      link: '/admin/quizzes' 
     },
   ];
 
@@ -123,7 +111,7 @@ const AdminDashboard = () => {
               Executive Management Dashboard
             </h1>
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Author 21-day SQL challenges, manage student roles, and publish learning curriculum dynamically backed by Supabase.
+              Author 21-day SQL challenges, manage quizzes and evaluations, and configure student permissions dynamically backed by Supabase.
             </p>
           </div>
 
@@ -145,7 +133,7 @@ const AdminDashboard = () => {
           <Loader2 className="w-8 h-8 text-rose-500 animate-spin" />
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
           {metricCards.map((card, idx) => {
             const Icon = card.icon;
             return (
@@ -246,19 +234,19 @@ const AdminDashboard = () => {
             </Link>
 
             <Link
-              to="/admin/tracks"
-              className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 hover:border-indigo-500/40 hover:bg-slate-950 transition flex items-center justify-between group"
+              to="/admin/quizzes"
+              className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 hover:border-emerald-500/40 hover:bg-slate-950 transition flex items-center justify-between group"
             >
               <div className="flex items-center space-x-3">
-                <div className="w-9 h-9 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400">
-                  <Layers className="w-4 h-4" />
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+                  <HelpCircle className="w-4 h-4" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-white group-hover:text-indigo-300 transition">Curriculum Tracks</h4>
-                  <p className="text-[10px] text-slate-400">Manage tracks & competency roadmaps</p>
+                  <h4 className="text-xs font-bold text-white group-hover:text-emerald-300 transition">Quizzes & Evaluations</h4>
+                  <p className="text-[10px] text-slate-400">Manage multiple choice questions</p>
                 </div>
               </div>
-              <ArrowRight className="w-4 h-4 text-slate-600 group-hover:text-indigo-400 group-hover:translate-x-0.5 transition-all" />
+              <ArrowRight className="w-4 h-4 text-slate-600 group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-all" />
             </Link>
 
             <Link

@@ -16,8 +16,6 @@ import Auth from './pages/Auth';
 
 // Student Portal Pages
 import StudentDashboard from './pages/student/StudentDashboard';
-import Tracks from './pages/Tracks';
-import TopicDetail from './pages/TopicDetail';
 import ContestHub from './pages/ContestHub';
 import ChallengePlayground from './pages/ChallengePlayground';
 import Leaderboard from './pages/Leaderboard';
@@ -26,8 +24,6 @@ import Leaderboard from './pages/Leaderboard';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import ChallengeManager from './pages/admin/ChallengeManager';
 import QuizManager from './pages/admin/QuizManager';
-import TrackManager from './pages/admin/TrackManager';
-import TopicManager from './pages/admin/TopicManager';
 import StudentManager from './pages/admin/StudentManager';
 
 // Root & Catch-all redirection dispatcher
@@ -76,8 +72,6 @@ function App() {
           {/* Legacy Aliases for seamless backwards compatibility */}
           <Route path="/contest" element={<Navigate to="/student/contest" replace />} />
           <Route path="/contest/day/:dayNumber" element={<Navigate to="/student/contest/day/:dayNumber" replace />} />
-          <Route path="/tracks" element={<Navigate to="/student/tracks" replace />} />
-          <Route path="/tracks/:trackSlug/:topicId" element={<Navigate to="/student/tracks/:trackSlug/:topicId" replace />} />
           <Route path="/leaderboard" element={<Navigate to="/student/leaderboard" replace />} />
 
           {/* STUDENT PORTAL (Strictly guarded by StudentRoute & StudentLayout) */}
@@ -91,8 +85,6 @@ function App() {
           >
             <Route index element={<Navigate to="/student/dashboard" replace />} />
             <Route path="dashboard" element={<StudentDashboard />} />
-            <Route path="tracks" element={<Tracks />} />
-            <Route path="tracks/:trackSlug/:topicId" element={<TopicDetail />} />
             <Route path="contest" element={<ContestHub />} />
             <Route path="contest/day/:dayNumber" element={<ChallengePlayground />} />
             <Route path="leaderboard" element={<Leaderboard />} />
@@ -112,8 +104,7 @@ function App() {
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="challenges" element={<ChallengeManager />} />
             <Route path="quizzes" element={<QuizManager />} />
-            <Route path="tracks" element={<TrackManager />} />
-            <Route path="topics" element={<TopicManager />} />
+            <Route path="leaderboard" element={<Leaderboard />} />
             <Route path="students" element={<StudentManager />} />
             <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
           </Route>

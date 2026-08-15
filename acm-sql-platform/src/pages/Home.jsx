@@ -54,11 +54,11 @@ const Home = () => {
               </Link>
               
               <Link
-                to="/tracks"
+                to="/leaderboard"
                 className="inline-flex items-center space-x-2 px-6 py-3.5 rounded-xl font-semibold text-sm text-slate-200 bg-slate-800/80 hover:bg-slate-800 border border-slate-700 hover:border-slate-600 transition duration-200"
               >
-                <Layers className="w-4 h-4 text-cyan-400" />
-                <span>Explore Learning Tracks</span>
+                <Trophy className="w-4 h-4 text-cyan-400" />
+                <span>View Leaderboard</span>
               </Link>
             </div>
           </div>

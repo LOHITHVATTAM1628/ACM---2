@@ -33,6 +33,8 @@ const initialChallengeForm = {
   description: '',
   difficulty: 'Easy',
   points: 100,
+  quiz_timer_seconds: 10,
+  sql_timer_seconds: 300,
   video_url: '',
   leetcode_url: '',
   init_sql: `-- Schema & Seed Data\nCREATE TABLE students (\n  id INT PRIMARY KEY,\n  full_name TEXT,\n  gpa REAL,\n  is_active INT\n);\n\nINSERT INTO students VALUES\n(1, 'Alice Johnson', 3.85, 1),\n(2, 'Bob Smith', 3.20, 1),\n(3, 'Charlie Brown', 3.92, 0);`,
@@ -96,6 +98,8 @@ const ChallengeManager = () => {
       description: challenge.description || '',
       difficulty: challenge.difficulty || 'Easy',
       points: challenge.points ?? 100,
+      quiz_timer_seconds: challenge.quiz_timer_seconds ?? 10,
+      sql_timer_seconds: challenge.sql_timer_seconds ?? 300,
       video_url: challenge.video_url || '',
       leetcode_url: challenge.leetcode_url || '',
       init_sql: challenge.init_sql || '',
@@ -161,6 +165,8 @@ const ChallengeManager = () => {
     try {
       const dayNum = Number(formData.day_number);
       const pointsNum = Number(formData.points);
+      const timerSecs = Number(formData.quiz_timer_seconds) || 10;
+      const sqlTimerSecs = Number(formData.sql_timer_seconds) || 300;
 
       if (!dayNum || dayNum < 1) throw new Error('Please enter a valid Day Number.');
       if (!formData.title.trim()) throw new Error('Please enter a challenge title.');
@@ -174,6 +180,8 @@ const ChallengeManager = () => {
         description: formData.description.trim(),
         difficulty: formData.difficulty || 'Easy',
         points: pointsNum || 100,
+        quiz_timer_seconds: timerSecs,
+        sql_timer_seconds: sqlTimerSecs,
         video_url: formData.video_url.trim() || null,
         leetcode_url: formData.leetcode_url.trim() || null,
         init_sql: formData.init_sql.trim(),
@@ -367,7 +375,7 @@ const ChallengeManager = () => {
                 <span>1. Basic Challenge Info</span>
               </span>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-1">Day *</label>
                   <input
@@ -405,6 +413,42 @@ const ChallengeManager = () => {
                     value={formData.points}
                     onChange={(e) => setFormData({ ...formData, points: e.target.value })}
                     className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-sm font-bold text-white focus:outline-none focus:border-cyan-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1" title="Countdown timer per MCQ question in seconds">
+                    Quiz Timer (s) *
+                  </label>
+                  <input
+                    type="number"
+                    min="5"
+                    max="180"
+                    step="1"
+                    required
+                    value={formData.quiz_timer_seconds}
+                    onChange={(e) => setFormData({ ...formData, quiz_timer_seconds: e.target.value })}
+                    placeholder="10"
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-sm font-bold text-cyan-300 focus:outline-none focus:border-cyan-400"
+                    title="Quiz timer duration per question in seconds"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1" title="Countdown timer for SQL Editor in seconds (e.g. 300s = 5m)">
+                    SQL Timer (s) *
+                  </label>
+                  <input
+                    type="number"
+                    min="30"
+                    max="3600"
+                    step="10"
+                    required
+                    value={formData.sql_timer_seconds}
+                    onChange={(e) => setFormData({ ...formData, sql_timer_seconds: e.target.value })}
+                    placeholder="300"
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-sm font-bold text-amber-300 focus:outline-none focus:border-amber-400"
+                    title="SQL Workspace countdown timer duration in seconds"
                   />
                 </div>
               </div>

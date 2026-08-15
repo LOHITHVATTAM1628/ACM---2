@@ -36,7 +36,6 @@ const Navbar = () => {
 
   // Navigation links - always rendered for everyone
   const navLinks = [
-    { name: 'Tracks', path: '/tracks', icon: Layers },
     { name: '21-Day Contest', path: '/contest', icon: Calendar, highlight: true },
     { name: 'Leaderboard', path: '/leaderboard', icon: Trophy },
     { name: '⚙️ Admin Portal', path: '/admin', icon: ShieldCheck, isAdminBadge: true },

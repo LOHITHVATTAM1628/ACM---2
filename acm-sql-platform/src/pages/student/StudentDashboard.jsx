@@ -7,7 +7,6 @@ import {
   Sparkles, 
   Trophy, 
   Calendar, 
-  Layers, 
   ArrowRight, 
   Play, 
   CheckCircle2, 
@@ -22,7 +21,6 @@ import {
 const StudentDashboard = () => {
   const { user, profile } = useAuth();
   const [challenges, setChallenges] = useState([]);
-  const [tracks, setTracks] = useState([]);
   const [topStudents, setTopStudents] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -42,20 +40,12 @@ const StudentDashboard = () => {
 
         setChallenges(challengesData || []);
 
-        // Fetch tracks live from Supabase
-        const { data: tracksData } = await supabase
-          .from('tracks')
-          .select('*, topics(id)')
-          .order('order_index', { ascending: true });
-
-        setTracks(tracksData || []);
-
         // Fetch top students using `name` column
         const { data: leaderData } = await supabase
           .from('profiles')
           .select('id, name, email, total_points, streak_count')
           .order('total_points', { ascending: false })
-          .limit(3);
+          .limit(5);
 
         setTopStudents(leaderData || []);
       } catch (err) {
@@ -73,10 +63,33 @@ const StudentDashboard = () => {
   const todaysChallenge = challenges.find(c => Number(c.day_number) === activeDay) || challenges[0];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-in fade-in duration-300">
+    <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-in-up">
       
+      {/* Background ACM Chapter Watermark */}
+      <div className="absolute top-12 right-0 pointer-events-none select-none opacity-[0.03] text-indigo-200 flex items-center justify-center z-0 overflow-hidden">
+        <svg
+          viewBox="0 0 400 400"
+          className="w-[450px] h-[450px] sm:w-[600px] sm:h-[600px] fill-current transform rotate-12"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path d="M200 30 L370 125 L370 275 L200 370 L30 275 L30 125 Z" stroke="currentColor" strokeWidth="20" fill="none" />
+          <text
+            x="200"
+            y="235"
+            textAnchor="middle"
+            fontFamily="monospace, sans-serif"
+            fontWeight="900"
+            fontSize="100"
+            fill="currentColor"
+            letterSpacing="10"
+          >
+            ACM
+          </text>
+        </svg>
+      </div>
+
       {/* Hero Welcome Banner */}
-      <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-slate-900 via-indigo-950/80 to-slate-900 border border-slate-800 p-6 sm:p-10 shadow-2xl">
+      <div className="relative z-10 rounded-3xl overflow-hidden bg-gradient-to-r from-slate-900 via-indigo-950/80 to-slate-900 border border-slate-800 p-6 sm:p-10 shadow-2xl animate-fade-in-up">
         <div className="absolute top-0 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 right-10 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
 
@@ -92,7 +105,7 @@ const StudentDashboard = () => {
             </h1>
             
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Continue your 21-Day SQL Contest streak, master curriculum tracks, and test real PostgreSQL queries with our in-browser WebAssembly engine.
+              Continue your 21-Day SQL Contest sprint, build your daily streak, and test real PostgreSQL queries with our in-browser WebAssembly engine.
             </p>
 
             <div className="pt-2 flex flex-wrap items-center gap-3">
@@ -110,7 +123,7 @@ const StudentDashboard = () => {
 
           {/* Today's Sprint Challenge Card */}
           {todaysChallenge && (
-            <div className="bg-slate-950/80 border border-cyan-500/30 rounded-2xl p-5 lg:w-80 shadow-2xl backdrop-blur-xl shrink-0 space-y-4">
+            <div className="bg-slate-950/80 border border-cyan-500/30 rounded-2xl p-5 lg:w-80 shadow-2xl backdrop-blur-xl shrink-0 space-y-4 animate-fade-in-up">
               <div className="flex items-center justify-between">
                 <span className="px-2.5 py-1 rounded-lg bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 font-mono text-xs font-black">
                   DAY {todaysChallenge.day_number}
@@ -135,7 +148,7 @@ const StudentDashboard = () => {
         </div>
       </div>
 
-      {/* Grid: 21-Day Contest Overview & Tracks */}
+      {/* Grid: 21-Day Contest Overview & Leaderboard */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         {/* Left Column: 21-Day Contest Timeline Preview (8 cols) */}
@@ -162,7 +175,7 @@ const StudentDashboard = () => {
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
-              {challenges.slice(0, 14).map((c) => {
+              {challenges.map((c) => {
                 const day = parseInt(c.day_number, 10) || 1;
                 const isUnlocked = Boolean(c.is_unlocked);
                 const isCompleted = isUnlocked && streak >= day;
@@ -219,54 +232,13 @@ const StudentDashboard = () => {
               })}
             </div>
           )}
-
-          {/* Curriculum Tracks Row */}
-          <div className="pt-4 space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Layers className="w-5 h-5 text-cyan-400" />
-                <h2 className="text-base font-bold text-white uppercase tracking-wider">
-                  Curriculum Learning Tracks
-                </h2>
-              </div>
-              <Link
-                to="/student/tracks"
-                className="text-xs font-bold text-cyan-400 hover:text-cyan-300 flex items-center space-x-1"
-              >
-                <span>Browse All Tracks</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {tracks.map((tr) => (
-                <Link
-                  key={tr.id}
-                  to="/student/tracks"
-                  className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-indigo-500/40 hover:bg-slate-900 transition flex flex-col justify-between group shadow-xl"
-                >
-                  <div className="space-y-2">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 group-hover:text-cyan-300 transition">
-                      <Layers className="w-5 h-5" />
-                    </div>
-                    <h3 className="text-sm font-bold text-white group-hover:text-cyan-300 transition">{tr.title}</h3>
-                    <p className="text-xs text-slate-400 line-clamp-2">{tr.description}</p>
-                  </div>
-                  <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-semibold text-slate-400">
-                    <span>{tr.topics?.length || 0} Lessons</span>
-                    <span className="text-cyan-400 group-hover:translate-x-1 transition-transform">Start Track →</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
         </div>
 
         {/* Right Column: Leaderboard Podium & Fast Links (4 cols) */}
         <div className="lg:col-span-4 space-y-6">
           
           {/* Leaderboard Podium Card */}
-          <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4">
+          <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4 animate-fade-in-up">
             <div className="flex items-center justify-between pb-3 border-b border-slate-800">
               <div className="flex items-center space-x-2">
                 <Trophy className="w-4 h-4 text-amber-400" />
@@ -312,10 +284,10 @@ const StudentDashboard = () => {
           </div>
 
           {/* Quick Access Card */}
-          <div className="bg-gradient-to-br from-indigo-950/40 to-slate-900 border border-slate-800 rounded-3xl p-6 space-y-3">
+          <div className="bg-gradient-to-br from-indigo-950/40 to-slate-900 border border-slate-800 rounded-3xl p-6 space-y-3 animate-fade-in-up">
             <h3 className="text-xs font-bold text-white uppercase tracking-wider">SQL Sandbox Playground</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Test custom queries, experiment with JOINs, and practice writing SQL independently.
+              Test custom queries, experiment with JOINs, and practice writing SQL independently with AI mentor assistance.
             </p>
             <Link
               to="/student/contest"

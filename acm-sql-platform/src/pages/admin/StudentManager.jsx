@@ -9,7 +9,8 @@ import {
   CheckCircle2, 
   AlertCircle, 
   Loader2,
-  BarChart3
+  BarChart3,
+  RotateCcw
 } from 'lucide-react';
 import { 
   BarChart, 
@@ -20,15 +21,6 @@ import {
   Cell 
 } from 'recharts';
 
-const mockProfiles = [
-  { id: '1', full_name: 'Elena Rostova', email: 'elena@university.edu', role: 'student', streak_count: 21, total_points: 2480 },
-  { id: '2', full_name: 'David Chen', email: 'david@chen.dev', role: 'student', streak_count: 19, total_points: 2150 },
-  { id: '3', full_name: 'Aisha Patel', email: 'aisha@patel.acm', role: 'mentor', streak_count: 18, total_points: 1980 },
-  { id: '4', full_name: 'Marcus Vance', email: 'marcus@university.edu', role: 'student', streak_count: 14, total_points: 1650 },
-  { id: '5', full_name: 'Sarah Connor', email: 'sarah@skynet.ai', role: 'student', streak_count: 12, total_points: 1420 },
-  { id: '6', full_name: 'Leo Maxwell', email: 'leo@acm.org', role: 'admin', streak_count: 9, total_points: 1190 },
-];
-
 const StudentManager = () => {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -36,6 +28,7 @@ const StudentManager = () => {
   const [roleFilter, setRoleFilter] = useState('all');
   const [actionNotice, setActionNotice] = useState(null);
   const [updatingId, setUpdatingId] = useState(null);
+  const [resettingId, setResettingId] = useState(null);
 
   useEffect(() => {
     fetchStudents();
@@ -91,6 +84,71 @@ const StudentManager = () => {
       });
     } finally {
       setUpdatingId(null);
+    }
+  };
+
+  // Completely reset a student's points, streaks, and quiz attempts
+  const handleResetProgress = async (student) => {
+    const studentName = student.name || student.full_name || student.email || 'this student';
+    const confirmed = window.confirm(
+      `Are you sure you want to completely reset ${studentName}'s progress? This will delete all XP, streaks, and challenge attempts. This cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    setResettingId(student.id);
+    setActionNotice(null);
+
+    try {
+      // 1. Reset core stats in profiles
+      const { error: profErr } = await supabase
+        .from('profiles')
+        .update({ total_points: 0, streak_count: 0 })
+        .eq('id', student.id);
+
+      if (profErr) {
+        console.error('Error resetting profile stats:', profErr.message);
+        throw profErr;
+      }
+
+      // 2. Clear quiz attempts
+      const { error: quizErr } = await supabase
+        .from('quiz_attempts')
+        .delete()
+        .eq('user_id', student.id);
+
+      if (quizErr) {
+        console.warn('Notice deleting quiz attempts:', quizErr.message);
+      }
+
+      // 3. Clear challenge submissions if table exists
+      try {
+        await supabase
+          .from('challenge_submissions')
+          .delete()
+          .eq('user_id', student.id);
+      } catch (subErr) {
+        console.warn('Notice deleting challenge submissions:', subErr);
+      }
+
+      // 4. Update local state immediately
+      setStudents((prev) =>
+        prev.map((s) =>
+          s.id === student.id ? { ...s, total_points: 0, streak_count: 0 } : s
+        )
+      );
+
+      setActionNotice({
+        type: 'success',
+        message: `Student progress has been completely reset.`,
+      });
+    } catch (err) {
+      console.error('Failed to reset student progress:', err);
+      setActionNotice({
+        type: 'error',
+        message: `Failed to reset student progress: ${err.message || err}`,
+      });
+    } finally {
+      setResettingId(null);
     }
   };
 
@@ -293,29 +351,52 @@ const StudentManager = () => {
                         </td>
 
                         <td className="py-3.5 px-5 text-right">
-                          <button
-                            onClick={() => handleToggleAdmin(student)}
-                            disabled={isUpdating}
-                            className={`px-3 py-1.5 rounded-xl font-bold transition-all text-[11px] inline-flex items-center space-x-1.5 ${
-                              isAdmin
-                                ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700'
-                                : 'bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 hover:border-rose-500/50'
-                            }`}
-                          >
-                            {isUpdating ? (
-                              <Loader2 className="w-3.5 h-3.5 animate-spin text-rose-400" />
-                            ) : isAdmin ? (
-                              <>
-                                <UserX className="w-3.5 h-3.5 text-slate-400" />
-                                <span>Demote to Student</span>
-                              </>
-                            ) : (
-                              <>
-                                <ShieldCheck className="w-3.5 h-3.5 text-rose-400" />
-                                <span>Promote to Admin</span>
-                              </>
-                            )}
-                          </button>
+                          <div className="flex items-center justify-end space-x-2">
+                            {/* Promote / Demote Button */}
+                            <button
+                              onClick={() => handleToggleAdmin(student)}
+                              disabled={isUpdating || resettingId === student.id}
+                              className={`px-3 py-1.5 rounded-xl font-bold transition-all text-[11px] inline-flex items-center space-x-1.5 ${
+                                isAdmin
+                                  ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700'
+                                  : 'bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border border-indigo-500/30 hover:border-indigo-500/50'
+                              }`}
+                            >
+                              {isUpdating ? (
+                                <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-400" />
+                              ) : isAdmin ? (
+                                <>
+                                  <UserX className="w-3.5 h-3.5 text-slate-400" />
+                                  <span>Demote</span>
+                                </>
+                              ) : (
+                                <>
+                                  <ShieldCheck className="w-3.5 h-3.5 text-indigo-400" />
+                                  <span>Promote to Admin</span>
+                                </>
+                              )}
+                            </button>
+
+                            {/* Reset Progress Button */}
+                            <button
+                              onClick={() => handleResetProgress(student)}
+                              disabled={isUpdating || resettingId === student.id}
+                              title="Reset all XP, streaks, and quiz attempts for this student"
+                              className="px-3 py-1.5 rounded-xl font-bold transition-all text-[11px] inline-flex items-center space-x-1.5 bg-rose-500/15 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 hover:border-rose-500/60 disabled:opacity-50"
+                            >
+                              {resettingId === student.id ? (
+                                <>
+                                  <Loader2 className="w-3.5 h-3.5 animate-spin text-rose-400" />
+                                  <span>Resetting...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <RotateCcw className="w-3.5 h-3.5 text-rose-400" />
+                                  <span>Reset Progress</span>
+                                </>
+                              )}
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );

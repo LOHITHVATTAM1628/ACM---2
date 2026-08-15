@@ -1,15 +1,16 @@
 import initSqlJs from 'sql.js';
+import sqlWasmUrl from 'sql.js/dist/sql-wasm.wasm?url';
 
 let SQLPromise = null;
 
 /**
  * Initializes and returns the cached sql.js SQL instance.
- * Loads the WebAssembly binary from CDN to prevent Vite bundler asset path issues.
+ * Uses Vite's native static asset URL loader to serve the bundled WebAssembly binary locally.
  */
 export async function getSqlInstance() {
   if (!SQLPromise) {
     SQLPromise = initSqlJs({
-      locateFile: (file) => `https://sql.js.org/dist/${file}`,
+      locateFile: () => sqlWasmUrl,
     });
   }
   return await SQLPromise;
@@ -65,18 +66,26 @@ export async function executeChallenge({ initSql, studentQuery, solutionQuery })
 
     // 1. Build schema & insert seed rows
     if (initSql && initSql.trim()) {
-      db.exec(initSql);
+      try {
+        db.exec(initSql);
+      } catch (schemaErr) {
+        throw new Error(`Schema Setup Error in init_sql: ${schemaErr.message}`);
+      }
     }
 
     // 2. Execute solution query to get expected ground-truth output
     let expectedOutput = { columns: [], values: [] };
     if (solutionQuery && solutionQuery.trim()) {
-      const solutionRes = db.exec(solutionQuery);
-      if (solutionRes && solutionRes.length > 0) {
-        expectedOutput = {
-          columns: solutionRes[0].columns || [],
-          values: solutionRes[0].values || [],
-        };
+      try {
+        const solutionRes = db.exec(solutionQuery);
+        if (solutionRes && solutionRes.length > 0) {
+          expectedOutput = {
+            columns: solutionRes[0].columns || [],
+            values: solutionRes[0].values || [],
+          };
+        }
+      } catch (solErr) {
+        console.warn('Solution Query execution issue:', solErr);
       }
     }
 
@@ -137,7 +146,11 @@ export async function executeDryRun({ initSql, studentQuery }) {
     db = new SQL.Database();
 
     if (initSql && initSql.trim()) {
-      db.exec(initSql);
+      try {
+        db.exec(initSql);
+      } catch (schemaErr) {
+        throw new Error(`Schema Setup Error in init_sql: ${schemaErr.message}`);
+      }
     }
 
     if (!studentQuery || !studentQuery.trim()) {
@@ -205,8 +218,8 @@ export async function inspectSchema(initSql) {
       sampleRows,
     };
   } catch (err) {
-    console.warn('Could not inspect schema from initSql:', err);
-    return null;
+    console.error('Schema Setup Error in inspectSchema:', err);
+    throw err;
   } finally {
     if (db) {
       try {
