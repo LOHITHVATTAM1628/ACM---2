@@ -1,7 +1,13 @@
 {
   "name": "acm-s-root",
+  "version": "1.0.0",
+  "private": true,
   "type": "module",
   "scripts": {
+    "dev": "npm --prefix acm-sql-platform run dev",
+    "build": "npm --prefix acm-sql-platform run build",
+    "preview": "npm --prefix acm-sql-platform run preview",
+    "lint": "npm --prefix acm-sql-platform run lint",
     "seed": "node scripts/seedContest.js"
   },
   "dependencies": {
