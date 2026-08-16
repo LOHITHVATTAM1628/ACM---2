@@ -41,6 +41,20 @@ const Auth = () => {
     }
   }, [user, profile, navigate]);
 
+  const handleWhatsAppReset = (e) => {
+    e.preventDefault();
+    
+    // Grab the email from state, or use a placeholder if they left it blank
+    const userEmail = email ? email : "[Insert your email here]";
+    
+    // Create the message and encode it for a URL
+    const message = `Hi, I forgot my password for the ACM SQL Platform. My email is: ${userEmail}`;
+    const whatsappUrl = `https://wa.me/919100521109?text=${encodeURIComponent(message)}`;
+    
+    // Open WhatsApp in a new tab
+    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg('');
@@ -241,9 +255,13 @@ const Auth = () => {
                   Password
                 </label>
                 {isLogin && (
-                  <span className="text-[11px] text-indigo-400 hover:text-indigo-300 cursor-pointer">
+                  <button
+                    type="button"
+                    onClick={handleWhatsAppReset}
+                    className="text-[11px] text-indigo-400 hover:text-indigo-300 transition-colors focus:outline-none cursor-pointer"
+                  >
                     Forgot password?
-                  </span>
+                  </button>
                 )}
               </div>
               <div className="relative">
