@@ -29,3 +29,316 @@
     background: #334155;
   }
 }
+
+/* ─────────────────────────────────────────────
+   DB CYLINDER 3D ROTATION  (Hero only)
+───────────────────────────────────────────── */
+@keyframes dbRotateY {
+  from { transform: rotateY(0deg)   translateY(0px); }
+  25%  { transform: rotateY(90deg)  translateY(-6px); }
+  50%  { transform: rotateY(180deg) translateY(-10px); }
+  75%  { transform: rotateY(270deg) translateY(-6px); }
+  to   { transform: rotateY(360deg) translateY(0px); }
+}
+
+@keyframes holoShimmer {
+  0%,100% { opacity: 0; transform: translateX(-100%) skewX(-15deg); }
+  50%     { opacity: 1; transform: translateX(200%)  skewX(-15deg); }
+}
+
+.db-scene {
+  perspective: 900px;
+  perspective-origin: 50% 40%;
+}
+
+.db-spinner {
+  transform-style: preserve-3d;
+  animation: dbRotateY 10s linear infinite;
+  position: relative;
+}
+
+.db-face {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.db-face-front { transform: rotateY(0deg); }
+.db-face-back  { transform: rotateY(180deg); }
+
+.db-holo-shimmer {
+  animation: holoShimmer 10s linear infinite;
+  pointer-events: none;
+}
+
+/* Respect user motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .db-spinner { animation: none !important; }
+  .db-holo-shimmer { animation: none !important; }
+}
+
+/* ─────────────────────────────────────────────
+   NAV HEADER  (Student top bar only)
+───────────────────────────────────────────── */
+@keyframes navSweep {
+  0%   { transform: translateX(-120%) skewX(-20deg); opacity: 0; }
+  50%  { opacity: 0.6; }
+  100% { transform: translateX(220%)  skewX(-20deg); opacity: 0; }
+}
+
+@keyframes logoBreathe {
+  0%, 100% { box-shadow: 0 0 8px rgba(34,211,238,0.35), 0 0 20px rgba(99,102,241,0.20); }
+  50%       { box-shadow: 0 0 16px rgba(34,211,238,0.60), 0 0 40px rgba(139,92,246,0.35); }
+}
+
+@keyframes navSlideDown {
+  from { opacity: 0; transform: translateY(-12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.nav-entrance { animation: navSlideDown 0.5s ease-out forwards; }
+
+.nav-sweep-bg {
+  position: relative;
+  overflow: visible;
+}
+.nav-sweep-bg::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(105deg, transparent 35%, rgba(99,102,241,0.07) 50%, transparent 65%);
+  animation: navSweep 12s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.logo-breathe { animation: logoBreathe 3s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-sweep-bg::before { animation: none; }
+  .logo-breathe         { animation: none; }
+  .nav-entrance         { animation: none; }
+}
+
+/* ─────────────────────────────────────────────
+   21-DAY SPRINT CARDS  (Dashboard section only)
+───────────────────────────────────────────── */
+@keyframes cardSweep {
+  0%   { transform: translateX(-120%) skewX(-15deg); opacity: 0; }
+  50%  { opacity: 0.55; }
+  100% { transform: translateX(220%)  skewX(-15deg); opacity: 0; }
+}
+
+@keyframes lockGoldPulse {
+  0%, 100% { filter: drop-shadow(0 0 3px rgba(251,191,36,0.4)); }
+  50%       { filter: drop-shadow(0 0 8px rgba(251,191,36,0.8)); }
+}
+
+@keyframes cardBreath {
+  0%, 100% { box-shadow: 0 0 10px rgba(34,211,238,0.08), 0 0 20px rgba(99,102,241,0.06); }
+  50%       { box-shadow: 0 0 18px rgba(34,211,238,0.18), 0 0 36px rgba(99,102,241,0.12); }
+}
+
+@keyframes dotPulse {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50%       { opacity: 1;   transform: scale(1.4); }
+}
+
+.sprint-card-unlocked {
+  position: relative;
+  overflow: hidden;
+  animation: cardBreath 4s ease-in-out infinite;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.sprint-card-unlocked::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 35%, rgba(99,102,241,0.10) 50%, transparent 65%);
+  animation: cardSweep 7s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+.sprint-card-unlocked:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 0 24px rgba(34,211,238,0.22), 0 0 48px rgba(99,102,241,0.14), 0 8px 24px rgba(0,0,0,0.4) !important;
+}
+
+.sprint-card-locked {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.sprint-card-locked:hover {
+  box-shadow: 0 0 14px rgba(251,191,36,0.10) !important;
+}
+
+.lock-gold-pulse { animation: lockGoldPulse 2.5s ease-in-out infinite; }
+.dot-pulse       { animation: dotPulse 2s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sprint-card-unlocked::before { animation: none; }
+  .sprint-card-unlocked         { animation: none; }
+  .lock-gold-pulse              { animation: none; }
+  .dot-pulse                    { animation: none; }
+}
+
+/* ─────────────────────────────────────────────
+   LEADERBOARD  (Premium polish only)
+───────────────────────────────────────────── */
+
+/* Slow, controlled glow breathe — reduced from previous */
+@keyframes goldGlow {
+  0%, 100% { box-shadow: 0 0 10px rgba(251,191,36,0.14), 0 0 24px rgba(217,119,6,0.08), 0 8px 32px rgba(0,0,0,0.55); }
+  50%       { box-shadow: 0 0 20px rgba(251,191,36,0.26), 0 0 44px rgba(217,119,6,0.14), 0 8px 32px rgba(0,0,0,0.55); }
+}
+@keyframes silverGlow {
+  0%, 100% { box-shadow: 0 0 8px rgba(203,213,225,0.10), 0 0 20px rgba(148,163,184,0.06), 0 6px 24px rgba(0,0,0,0.50); }
+  50%       { box-shadow: 0 0 16px rgba(203,213,225,0.20), 0 0 36px rgba(148,163,184,0.10), 0 6px 24px rgba(0,0,0,0.50); }
+}
+@keyframes bronzeGlow {
+  0%, 100% { box-shadow: 0 0 8px rgba(180,83,9,0.14), 0 0 20px rgba(146,64,14,0.08), 0 6px 24px rgba(0,0,0,0.50); }
+  50%       { box-shadow: 0 0 16px rgba(180,83,9,0.26), 0 0 36px rgba(146,64,14,0.14), 0 6px 24px rgba(0,0,0,0.50); }
+}
+
+/* Travelling shimmer along the border (::before) */
+@keyframes goldBorderSweep {
+  0%   { transform: translateX(-120%) skewX(-20deg); opacity: 0; }
+  20%  { opacity: 0.7; }
+  80%  { opacity: 0.7; }
+  100% { transform: translateX(220%)  skewX(-20deg); opacity: 0; }
+}
+@keyframes silverBorderSweep {
+  0%   { transform: translateX(-120%) skewX(-20deg); opacity: 0; }
+  20%  { opacity: 0.5; }
+  80%  { opacity: 0.5; }
+  100% { transform: translateX(220%)  skewX(-20deg); opacity: 0; }
+}
+@keyframes bronzeBorderSweep {
+  0%   { transform: translateX(-120%) skewX(-20deg); opacity: 0; }
+  20%  { opacity: 0.5; }
+  80%  { opacity: 0.5; }
+  100% { transform: translateX(220%)  skewX(-20deg); opacity: 0; }
+}
+
+/* Crown soft spark flicker */
+@keyframes crownSpark {
+  0%,90%,100% { opacity: 0.9; filter: drop-shadow(0 0 3px rgba(251,191,36,0.6)); }
+  95%          { opacity: 1;   filter: drop-shadow(0 0 8px rgba(251,191,36,0.95)) drop-shadow(0 0 16px rgba(251,191,36,0.4)); }
+}
+
+@keyframes lbBgDrift {
+  0%,100% { transform: translateX(-10%) translateY(5%) scale(1); }
+  50%      { transform: translateX(10%) translateY(-8%) scale(1.08); }
+}
+@keyframes rowSweep {
+  0%   { transform: translateX(-100%) skewX(-12deg); opacity: 0; }
+  50%  { opacity: 0.5; }
+  100% { transform: translateX(200%) skewX(-12deg); opacity: 0; }
+}
+
+/* Base card animations */
+.lb-gold-card   {
+  animation: goldGlow 5s ease-in-out infinite;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  overflow: visible;
+}
+.lb-silver-card {
+  animation: silverGlow 6s ease-in-out infinite 0.5s;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+.lb-bronze-card {
+  animation: bronzeGlow 6s ease-in-out infinite 1s;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Travelling border shimmer overlay */
+.lb-gold-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(105deg,
+    transparent 30%,
+    rgba(251,191,36,0.12) 48%,
+    rgba(255,215,0,0.08)  50%,
+    rgba(251,191,36,0.12) 52%,
+    transparent 70%
+  );
+  animation: goldBorderSweep 8s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+  border-radius: inherit;
+}
+.lb-silver-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(105deg,
+    transparent 30%,
+    rgba(203,213,225,0.10) 48%,
+    rgba(226,232,240,0.07) 50%,
+    rgba(203,213,225,0.10) 52%,
+    transparent 70%
+  );
+  animation: silverBorderSweep 10s ease-in-out infinite 2s;
+  pointer-events: none;
+  z-index: 1;
+  border-radius: inherit;
+}
+.lb-bronze-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(105deg,
+    transparent 30%,
+    rgba(180,83,9,0.12) 48%,
+    rgba(217,119,6,0.08) 50%,
+    rgba(180,83,9,0.12) 52%,
+    transparent 70%
+  );
+  animation: bronzeBorderSweep 11s ease-in-out infinite 4s;
+  pointer-events: none;
+  z-index: 1;
+  border-radius: inherit;
+}
+
+/* Crown spark animation */
+.lb-crown-spark { animation: crownSpark 6s ease-in-out infinite; }
+
+/* Hover elevation */
+.lb-gold-card:hover   { transform: translateY(-5px); }
+.lb-silver-card:hover { transform: translateY(-3px); }
+.lb-bronze-card:hover { transform: translateY(-3px); }
+
+/* Table row hover sweep */
+.lb-row-sweep {
+  position: relative;
+  overflow: hidden;
+}
+.lb-row-sweep::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 30%, rgba(99,102,241,0.06) 50%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.lb-row-sweep:hover::after { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .lb-gold-card, .lb-silver-card, .lb-bronze-card { animation: none; }
+  .lb-gold-card::before, .lb-silver-card::before, .lb-bronze-card::before { display: none; }
+  .lb-crown-spark { animation: none; }
+  .lb-row-sweep::after { display: none; }
+}
+
+
