@@ -652,7 +652,7 @@ const ChallengePlayground = () => {
   // Loading State
   if (loading) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] bg-slate-950 flex flex-col items-center justify-center space-y-4 text-slate-300">
+      <div className="min-h-[calc(100vh-4rem)] cp-page-bg flex flex-col items-center justify-center space-y-4 text-slate-300">
         <div className="relative flex items-center justify-center">
           <div className="w-16 h-16 rounded-full border-4 border-indigo-500/20 border-t-cyan-400 animate-spin" />
           <Loader2 className="w-6 h-6 text-cyan-400 absolute animate-pulse" />
@@ -667,8 +667,8 @@ const ChallengePlayground = () => {
   // Not Found / Error State
   if (error || !challenge) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] bg-slate-950 flex items-center justify-center p-6">
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 max-w-md w-full text-center space-y-5 shadow-2xl">
+      <div className="min-h-[calc(100vh-4rem)] cp-page-bg flex items-center justify-center p-6">
+        <div className="cp-glass-panel rounded-3xl p-8 max-w-md w-full text-center space-y-5 shadow-2xl cp-fade-in">
           <div className="w-14 h-14 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mx-auto text-rose-400">
             <AlertCircle className="w-7 h-7" />
           </div>
@@ -680,7 +680,7 @@ const ChallengePlayground = () => {
           </div>
           <Link
             to="/student/contest"
-            className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-600 text-white text-xs font-bold shadow-md transition"
+            className="cp-btn-primary inline-flex items-center space-x-2 px-5 py-2.5 rounded-xl text-xs font-bold shadow-md transition"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Return to Contest Hub</span>
@@ -695,23 +695,23 @@ const ChallengePlayground = () => {
   return (
     <div 
       onCopy={() => { internalClipboard.current = window.getSelection()?.toString() || ''; }}
-      className="min-h-[calc(100vh-4rem)] bg-slate-950 text-slate-100 flex flex-col"
+      className="min-h-[calc(100vh-4rem)] cp-page-bg text-slate-100 flex flex-col"
     >
       
-      {/* Top Header Bar & Learning Loop Tab Switcher */}
-      <div className="border-b border-slate-800/80 bg-slate-900/90 backdrop-blur-md px-4 sm:px-6 py-3 flex flex-col md:flex-row md:items-center justify-between gap-4 z-20">
+      {/* ═══════════════ TOP NAVIGATION BAR ═══════════════ */}
+      <div className="cp-top-nav border-b border-slate-800/60 px-4 sm:px-6 py-3 flex flex-col md:flex-row md:items-center justify-between gap-4 z-20">
         
         {/* Left: Day info & Title */}
         <div className="flex items-center space-x-3">
           <Link
             to="/student/contest"
-            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition shrink-0"
+            className="cp-back-btn p-1.5 rounded-lg transition shrink-0"
             title="Back to Contest Hub"
           >
             <ArrowLeft className="w-4 h-4" />
           </Link>
           <div className="flex items-center space-x-2 min-w-0">
-            <span className="text-xs font-black px-2.5 py-1 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 shrink-0">
+            <span className="cp-day-badge text-xs font-black px-2.5 py-1 rounded-lg shrink-0">
               DAY {String(challenge.day_number).padStart(2, '0')}
             </span>
             <h1 className="text-sm sm:text-base font-bold text-white truncate max-w-[200px] sm:max-w-md">
@@ -721,13 +721,13 @@ const ChallengePlayground = () => {
         </div>
 
         {/* Center: Learning Loop 3-Step Tabs */}
-        <div className="flex items-center p-1 rounded-2xl bg-slate-950 border border-slate-800 self-center md:self-auto shadow-inner">
+        <div className="cp-tab-container flex items-center p-1 rounded-2xl self-center md:self-auto">
           <button
             onClick={() => setLearningTab('lesson')}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            className={`cp-tab flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
               learningTab === 'lesson'
-                ? 'bg-gradient-to-r from-rose-600 to-indigo-600 text-white shadow-md shadow-rose-600/30'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+                ? 'cp-tab-active cp-tab-lesson'
+                : 'cp-tab-inactive'
             }`}
           >
             <Tv className="w-4 h-4" />
@@ -736,16 +736,16 @@ const ChallengePlayground = () => {
 
           <button
             onClick={() => setLearningTab('quiz')}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold transition-all relative ${
+            className={`cp-tab flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold transition-all relative ${
               learningTab === 'quiz'
-                ? 'bg-gradient-to-r from-emerald-600 to-indigo-600 text-white shadow-md shadow-emerald-600/30'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+                ? 'cp-tab-active cp-tab-quiz'
+                : 'cp-tab-inactive'
             }`}
           >
             <FileQuestion className="w-4 h-4" />
             <span>📝 Knowledge Check</span>
             {quizQuestions.length > 0 && (
-              <span className="ml-1 px-1.5 py-0.2 rounded-full bg-slate-800 text-[10px] font-black">
+              <span className="cp-tab-badge ml-1 px-1.5 py-0.2 rounded-full text-[10px] font-black">
                 {quizQuestions.length}
               </span>
             )}
@@ -753,10 +753,10 @@ const ChallengePlayground = () => {
 
           <button
             onClick={() => setLearningTab('workspace')}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            className={`cp-tab flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
               learningTab === 'workspace'
-                ? 'bg-gradient-to-r from-indigo-600 to-cyan-600 text-white shadow-md shadow-indigo-600/30'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+                ? 'cp-tab-active cp-tab-workspace'
+                : 'cp-tab-inactive'
             }`}
           >
             <Code2 className="w-4 h-4" />
@@ -766,18 +766,18 @@ const ChallengePlayground = () => {
 
         {/* Right: Points & Difficulty */}
         <div className="hidden lg:flex items-center space-x-3">
-          <div className="flex items-center space-x-1.5 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-semibold">
+          <div className="cp-xp-badge flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-semibold">
             <Sparkles className="w-3.5 h-3.5" />
             <span>+{challenge.points} XP</span>
           </div>
 
           <span
-            className={`text-xs font-bold px-2.5 py-1 rounded-md ${
+            className={`text-xs font-bold px-2.5 py-1 rounded-lg ${
               challenge.difficulty === 'Easy'
-                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                ? 'cp-diff-easy'
                 : challenge.difficulty === 'Medium'
-                ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                ? 'cp-diff-medium'
+                : 'cp-diff-hard'
             }`}
           >
             {challenge.difficulty || 'Easy'}
@@ -785,11 +785,11 @@ const ChallengePlayground = () => {
         </div>
       </div>
 
-      {/* TAB 1: 📺 LESSON (YouTube Video Embed & Key Concept Overview) */}
-      <div className={`flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto ${learningTab === 'lesson' ? 'block' : 'hidden'}`}>
+      {/* ═══════════════ TAB 1: LESSON ═══════════════ */}
+      <div className={`flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto cp-fade-in ${learningTab === 'lesson' ? 'block' : 'hidden'}`}>
         <div className="max-w-5xl mx-auto space-y-6">
-          <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+          <div className="cp-glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-700/40 pb-5">
               <div>
                 <span className="text-xs font-bold uppercase tracking-wider text-rose-400 flex items-center space-x-1.5">
                   <Video className="w-4 h-4" />
@@ -802,7 +802,7 @@ const ChallengePlayground = () => {
 
               <button
                 onClick={() => setLearningTab('quiz')}
-                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white text-xs font-bold flex items-center space-x-2 shadow-lg shadow-emerald-600/30 transition self-start sm:self-auto"
+                className="cp-btn-secondary px-5 py-2.5 rounded-xl text-xs font-bold flex items-center space-x-2 transition self-start sm:self-auto"
               >
                 <span>Take Knowledge Check</span>
                 <ChevronRight className="w-4 h-4" />
@@ -811,7 +811,7 @@ const ChallengePlayground = () => {
 
             {/* Video Player Frame */}
             {embedVideoUrl ? (
-              <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 shadow-2xl">
+              <div className="cp-video-frame relative aspect-video w-full rounded-2xl overflow-hidden">
                 <iframe
                   src={embedVideoUrl}
                   title={`Day ${challenge.day_number} Video Lesson`}
@@ -821,7 +821,7 @@ const ChallengePlayground = () => {
                 />
               </div>
             ) : (
-              <div className="p-12 text-center bg-slate-950/70 border border-dashed border-slate-800 rounded-2xl space-y-3">
+              <div className="cp-empty-state p-12 text-center rounded-2xl space-y-3">
                 <div className="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-400 flex items-center justify-center mx-auto border border-rose-500/20">
                   <Video className="w-6 h-6" />
                 </div>
@@ -832,13 +832,13 @@ const ChallengePlayground = () => {
                 <div className="pt-2 flex justify-center space-x-3">
                   <button
                     onClick={() => setLearningTab('quiz')}
-                    className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition"
+                    className="cp-btn-secondary px-4 py-2 rounded-xl text-xs font-bold transition"
                   >
                     Go to Knowledge Check
                   </button>
                   <button
                     onClick={() => setLearningTab('workspace')}
-                    className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition"
+                    className="cp-btn-primary px-4 py-2 rounded-xl text-xs font-bold transition"
                   >
                     Open SQL Workspace
                   </button>
@@ -847,7 +847,7 @@ const ChallengePlayground = () => {
             )}
 
             {/* Problem Overview Description */}
-            <div className="bg-slate-950/80 border border-slate-800/90 rounded-2xl p-5 space-y-3">
+            <div className="cp-desc-panel rounded-2xl p-5 space-y-3">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center space-x-2">
                 <BookOpen className="w-4 h-4 text-cyan-400" />
                 <span>Lecture Synopsis & SQL Target</span>
@@ -860,13 +860,13 @@ const ChallengePlayground = () => {
         </div>
       </div>
 
-      {/* TAB 2: 📝 KNOWLEDGE CHECK (Interactive 10s Rapid-Fire MCQ Evaluation) */}
-      <div className={`flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto ${learningTab === 'quiz' ? 'block' : 'hidden'}`}>
+      {/* ═══════════════ TAB 2: KNOWLEDGE CHECK ═══════════════ */}
+      <div className={`flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto cp-fade-in ${learningTab === 'quiz' ? 'block' : 'hidden'}`}>
         <div className="max-w-4xl mx-auto space-y-6">
-          <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+          <div className="cp-glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
             
             {/* Header / Score Banner */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-700/40 pb-5">
               <div>
                 <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center space-x-1.5">
                   <FileQuestion className="w-4 h-4" />
@@ -876,12 +876,12 @@ const ChallengePlayground = () => {
                   Validate Your SQL Mastery
                 </h2>
                 <p className="text-xs text-slate-400 mt-1">
-                  Test your understanding under time pressure (10s per question) before writing SQL.
+                  Test your understanding under time pressure ({timerDuration}s per question) before writing SQL.
                 </p>
               </div>
 
               {quizSubmitted && quizScore && (
-                <div className="flex items-center space-x-3 px-4 py-2 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-bold shrink-0">
+                <div className="cp-quiz-score-badge flex items-center space-x-3 px-4 py-2 rounded-2xl text-xs font-bold shrink-0">
                   <Award className="w-5 h-5 text-emerald-400" />
                   <span>Score: {quizScore.correct} / {quizScore.total} ({quizScore.percentage}%) • +{quizScore.pointsEarned} XP</span>
                 </div>
@@ -890,7 +890,7 @@ const ChallengePlayground = () => {
 
             {/* Quiz Save Error Alert Banner */}
             {quizSaveError && (
-              <div className="p-4 rounded-2xl bg-rose-950/80 border border-rose-500/50 text-rose-200 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg animate-in slide-in-from-top duration-300">
+              <div className="cp-error-banner p-4 rounded-2xl text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
                 <div className="flex items-center space-x-2.5">
                   <AlertCircle className="w-5 h-5 text-rose-400 shrink-0" />
                   <span>{quizSaveError}</span>
@@ -901,7 +901,7 @@ const ChallengePlayground = () => {
                       type="button"
                       disabled={isSavingQuiz}
                       onClick={() => finalizeQuiz(quizAnswers)}
-                      className="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition flex items-center space-x-1"
+                      className="cp-btn-secondary px-3 py-1 rounded-lg text-xs font-bold transition flex items-center space-x-1"
                     >
                       {isSavingQuiz ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
                       <span>Retry Saving Quiz</span>
@@ -920,11 +920,11 @@ const ChallengePlayground = () => {
 
             {quizLoading ? (
               <div className="py-20 flex flex-col items-center justify-center space-y-3">
-                <Loader2 className="w-8 h-8 text-emerald-400 animate-spin" />
+                <Loader2 className="w-8 h-8 text-cyan-400 animate-spin" />
                 <p className="text-xs text-slate-400">Loading knowledge check questions & attempt records...</p>
               </div>
             ) : quizQuestions.length === 0 ? (
-              <div className="p-12 text-center bg-slate-950/70 border border-dashed border-slate-800 rounded-2xl space-y-3">
+              <div className="cp-empty-state p-12 text-center rounded-2xl space-y-3">
                 <FileQuestion className="w-10 h-10 text-slate-600 mx-auto" />
                 <h3 className="text-base font-bold text-white">No Quiz Questions Configured Yet</h3>
                 <p className="text-xs text-slate-400 max-w-md mx-auto">
@@ -932,23 +932,24 @@ const ChallengePlayground = () => {
                 </p>
                 <button
                   onClick={() => setLearningTab('workspace')}
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-600 text-white text-xs font-bold shadow-md transition inline-flex items-center space-x-2"
+                  className="cp-btn-primary px-5 py-2.5 rounded-xl text-xs font-bold shadow-md transition inline-flex items-center space-x-2"
                 >
                   <span>Launch Commit2Query Workspace</span>
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
             ) : quizSubmitted || quizAttempt ? (
-              /* VIEW 1: LOCKED ATTEMPT REVIEW */
+              /* ──── VIEW 1: COMPLETED QUIZ REVIEW ──── */
               <div className="space-y-6">
-                <div className="p-4 rounded-2xl bg-slate-950/90 border border-emerald-500/30 flex items-center justify-between">
+                {/* Completion Banner */}
+                <div className="cp-quiz-complete-banner p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/40 shrink-0">
-                      <CheckCircle2 className="w-5 h-5" />
+                    <div className="w-10 h-10 rounded-full cp-success-icon flex items-center justify-center shrink-0">
+                      <CheckCircle2 className="w-6 h-6" />
                     </div>
                     <div>
-                      <h4 className="text-xs font-bold text-white">
-                        ✅ You have completed this quiz attempt
+                      <h4 className="text-sm font-bold text-white">
+                        ✅ Quiz Completed
                       </h4>
                       <p className="text-[11px] text-slate-400">
                         Score: <strong className="text-emerald-300">{quizScore?.correct ?? 0} / {quizQuestions.length}</strong> ({quizScore?.percentage ?? 0}%) • Points Earned: <strong className="text-cyan-400">+{quizScore?.pointsEarned ?? 0} XP</strong>
@@ -959,7 +960,7 @@ const ChallengePlayground = () => {
                   <button
                     type="button"
                     onClick={() => setLearningTab('workspace')}
-                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white text-xs font-bold shadow-md transition flex items-center space-x-1.5 shrink-0"
+                    className="cp-btn-primary px-4 py-2 rounded-xl text-xs font-bold shadow-md transition flex items-center space-x-1.5 shrink-0"
                   >
                     <span>Proceed to Commit2Query</span>
                     <ChevronRight className="w-4 h-4" />
@@ -985,15 +986,13 @@ const ChallengePlayground = () => {
                     return (
                       <div
                         key={q.id}
-                        className={`p-5 rounded-2xl border transition shadow-lg space-y-3 ${
-                          isCorrect
-                            ? 'bg-emerald-950/20 border-emerald-500/40'
-                            : 'bg-rose-950/20 border-rose-500/40'
+                        className={`cp-review-card p-5 rounded-2xl space-y-3 ${
+                          isCorrect ? 'cp-review-correct' : 'cp-review-incorrect'
                         }`}
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex items-center space-x-2">
-                            <span className="w-6 h-6 rounded-full bg-slate-800 text-slate-300 text-xs font-bold flex items-center justify-center shrink-0">
+                            <span className="cp-q-number w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center shrink-0">
                               {qIdx + 1}
                             </span>
                             <h3 className="text-sm font-bold text-white leading-snug">
@@ -1016,33 +1015,33 @@ const ChallengePlayground = () => {
                             const isAnswerKey = correctIdx === optIdx;
                             const isSelected = selectedIdx === optIdx;
 
-                            let optStyle = 'bg-slate-950/40 border-slate-900 text-slate-500 opacity-60';
+                            let optClass = 'cp-opt-default';
                             if (isAnswerKey) {
-                              optStyle = 'bg-emerald-950/60 border-emerald-500/60 text-emerald-200 font-bold ring-1 ring-emerald-500/40';
+                              optClass = 'cp-opt-correct';
                             } else if (isSelected && !isAnswerKey) {
-                              optStyle = 'bg-rose-950/60 border-rose-500/60 text-rose-200 font-bold';
+                              optClass = 'cp-opt-incorrect';
                             }
 
                             return (
                               <div
                                 key={optIdx}
-                                className={`p-2.5 rounded-xl text-xs flex items-center space-x-2 border ${optStyle}`}
+                                className={`cp-review-option p-2.5 rounded-xl text-xs flex items-center space-x-2 ${optClass}`}
                               >
-                                <span className="w-5 h-5 rounded text-[10px] font-bold flex items-center justify-center bg-slate-800 text-slate-400 shrink-0">
+                                <span className="cp-opt-letter w-5 h-5 rounded text-[10px] font-bold flex items-center justify-center shrink-0">
                                   {String.fromCharCode(65 + optIdx)}
                                 </span>
-                                <span className="flex-1 truncate">{opt}</span>
+                                <span className="flex-1">{opt}</span>
                               </div>
                             );
                           })}
                         </div>
 
                         {q.explanation && (
-                          <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300 space-y-1">
+                          <div className="cp-explanation p-3 rounded-xl text-xs space-y-1">
                             <span className="font-bold text-cyan-300 uppercase text-[10px] tracking-wider block">
                               💡 Explanation:
                             </span>
-                            <p>{q.explanation}</p>
+                            <p className="text-slate-300">{q.explanation}</p>
                           </div>
                         )}
                       </div>
@@ -1051,9 +1050,9 @@ const ChallengePlayground = () => {
                 </div>
               </div>
             ) : !isQuizActive ? (
-              /* VIEW 2: QUIZ START / RULES LOBBY */
-              <div className="p-8 text-center bg-slate-950/80 border border-slate-800 rounded-3xl space-y-6 shadow-2xl">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-600 to-indigo-600 flex items-center justify-center mx-auto text-white shadow-xl shadow-emerald-500/20">
+              /* ──── VIEW 2: QUIZ START LOBBY ──── */
+              <div className="cp-quiz-lobby p-8 text-center rounded-3xl space-y-6">
+                <div className="w-16 h-16 rounded-2xl cp-quiz-lobby-icon flex items-center justify-center mx-auto text-white">
                   <FileQuestion className="w-8 h-8" />
                 </div>
 
@@ -1067,21 +1066,21 @@ const ChallengePlayground = () => {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-xl mx-auto text-left">
-                  <div className="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 space-y-1">
+                  <div className="cp-rule-card p-3.5 rounded-2xl space-y-1">
                     <div className="flex items-center space-x-2 text-xs font-bold text-amber-400">
                       <span>⏱️ {challenge?.quiz_timer_seconds || 10}s Per Question</span>
                     </div>
                     <p className="text-[11px] text-slate-400">Automatic advance when timer hits zero.</p>
                   </div>
 
-                  <div className="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 space-y-1">
+                  <div className="cp-rule-card p-3.5 rounded-2xl space-y-1">
                     <div className="flex items-center space-x-2 text-xs font-bold text-cyan-400">
                       <span>⚡ 1-Time Attempt</span>
                     </div>
                     <p className="text-[11px] text-slate-400">Score permanently counts towards leaderboard.</p>
                   </div>
 
-                  <div className="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 space-y-1">
+                  <div className="cp-rule-card p-3.5 rounded-2xl space-y-1">
                     <div className="flex items-center space-x-2 text-xs font-bold text-emerald-400">
                       <span>🏆 +20 XP / Answer</span>
                     </div>
@@ -1093,7 +1092,7 @@ const ChallengePlayground = () => {
                   <button
                     type="button"
                     onClick={handleStartQuiz}
-                    className="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white font-extrabold text-sm shadow-xl shadow-emerald-600/30 transition transform hover:scale-105 active:scale-95 inline-flex items-center space-x-2.5"
+                    className="cp-btn-start-quiz px-8 py-3.5 rounded-2xl text-sm font-extrabold inline-flex items-center space-x-2.5 transition"
                   >
                     <span>Start Knowledge Check ({quizQuestions.length} Questions)</span>
                     <ChevronRight className="w-5 h-5" />
@@ -1101,32 +1100,42 @@ const ChallengePlayground = () => {
                 </div>
               </div>
             ) : (
-              /* VIEW 3: ACTIVE QUESTION STEPPER WITH COUNTDOWN TIMER */
+              /* ──── VIEW 3: ACTIVE QUIZ WITH TIMER ──── */
               <div className="space-y-6">
                 
                 {/* Stepper Top Bar with Timer */}
-                <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-950 border border-slate-800 shadow-inner">
+                <div className="cp-quiz-stepper flex items-center justify-between p-4 rounded-2xl">
                   <div className="flex items-center space-x-3">
-                    <span className="px-3 py-1 rounded-xl bg-indigo-500/20 text-indigo-300 font-mono text-xs font-black">
+                    <span className="cp-q-counter px-3 py-1 rounded-xl font-mono text-xs font-black">
                       Question {currentQuestionIdx + 1} of {quizQuestions.length}
                     </span>
-                    <div className="w-32 sm:w-48 h-2 rounded-full bg-slate-800 overflow-hidden">
-                      <div 
-                        className="h-full bg-gradient-to-r from-indigo-500 to-cyan-400 transition-all duration-300"
-                        style={{ width: `${((currentQuestionIdx + 1) / quizQuestions.length) * 100}%` }}
-                      />
+                    {/* Progress dots */}
+                    <div className="hidden sm:flex items-center space-x-1.5">
+                      {quizQuestions.map((_, dotIdx) => (
+                        <span
+                          key={dotIdx}
+                          className={`w-2.5 h-2.5 rounded-full transition-all ${
+                            dotIdx < currentQuestionIdx
+                              ? 'bg-emerald-500 shadow-sm shadow-emerald-500/30'
+                              : dotIdx === currentQuestionIdx
+                              ? 'bg-cyan-400 shadow-sm shadow-cyan-400/40 scale-125'
+                              : 'bg-slate-700'
+                          }`}
+                        />
+                      ))}
                     </div>
                   </div>
 
                   {/* Countdown Timer Display */}
-                  <div className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-xl font-mono text-xs font-black border transition-all ${
+                  <div className={`cp-timer flex items-center space-x-2 px-3.5 py-1.5 rounded-xl font-mono text-xs font-black transition-all ${
                     timeLeft <= 3 
-                      ? 'bg-rose-500/20 border-rose-500/60 text-rose-300 animate-pulse shadow-lg shadow-rose-500/20'
+                      ? 'cp-timer-critical'
                       : timeLeft <= 6
-                      ? 'bg-amber-500/20 border-amber-500/50 text-amber-300'
-                      : 'bg-cyan-500/20 border-cyan-500/40 text-cyan-300'
+                      ? 'cp-timer-warning'
+                      : 'cp-timer-safe'
                   }`}>
-                    <span>⏱️ {timeLeft}s remaining</span>
+                    <Clock className="w-3.5 h-3.5" />
+                    <span>{timeLeft}s</span>
                   </div>
                 </div>
 
@@ -1139,9 +1148,9 @@ const ChallengePlayground = () => {
                   }
 
                   return (
-                    <div className="p-6 sm:p-8 rounded-3xl bg-slate-950/80 border border-slate-800 shadow-2xl space-y-6 animate-in fade-in zoom-in-95 duration-200">
+                    <div className="cp-question-card p-6 sm:p-8 rounded-3xl space-y-6 cp-fade-in">
                       <div className="flex items-start space-x-3">
-                        <span className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-cyan-600 text-white text-xs font-black flex items-center justify-center shrink-0 shadow-md">
+                        <span className="cp-q-badge w-9 h-9 rounded-xl text-xs font-black flex items-center justify-center shrink-0">
                           Q{currentQuestionIdx + 1}
                         </span>
                         <h3 className="text-base sm:text-lg font-bold text-white leading-relaxed">
@@ -1149,19 +1158,19 @@ const ChallengePlayground = () => {
                         </h3>
                       </div>
 
-                      {/* 4 Option Buttons (Instant Click Selection) */}
+                      {/* 4 Option Buttons */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                         {Array.isArray(parsedOpts) && parsedOpts.map((opt, optIdx) => (
                           <button
                             key={optIdx}
                             type="button"
                             onClick={() => handleOptionSelect(optIdx)}
-                            className="p-4 rounded-2xl text-xs sm:text-sm font-semibold text-left flex items-center space-x-3 bg-slate-900 border border-slate-800 hover:border-cyan-400 hover:bg-slate-800/80 text-slate-200 hover:text-white transition shadow-md group active:scale-95"
+                            className="cp-option-btn p-4 rounded-2xl text-xs sm:text-sm font-semibold text-left flex items-center space-x-3 group active:scale-[0.97] transition"
                           >
-                            <span className="w-7 h-7 rounded-xl text-xs font-black flex items-center justify-center bg-slate-800 text-slate-400 group-hover:bg-cyan-500 group-hover:text-slate-950 transition shrink-0">
+                            <span className="cp-option-letter w-8 h-8 rounded-xl text-xs font-black flex items-center justify-center shrink-0 transition">
                               {String.fromCharCode(65 + optIdx)}
                             </span>
-                            <span className="flex-1 leading-snug">{opt}</span>
+                            <span className="flex-1 leading-snug text-slate-200 group-hover:text-white transition">{opt}</span>
                           </button>
                         ))}
                       </div>
@@ -1180,14 +1189,14 @@ const ChallengePlayground = () => {
         </div>
       </div>
 
-      {/* TAB 3: 💻 COMMIT2QUERY (Preserved Interactive WebAssembly SQL Workspace) */}
+      {/* ═══════════════ TAB 3: COMMIT2QUERY WORKSPACE ═══════════════ */}
       <div className={`flex-1 flex flex-col ${learningTab === 'workspace' ? 'flex' : 'hidden'}`}>
         
         {/* Accepted Reward Banner */}
         {showSuccessBanner && (
-          <div className="bg-gradient-to-r from-emerald-950 via-teal-900 to-slate-900 border-b border-emerald-500/40 px-6 py-3 flex items-center justify-between animate-in slide-in-from-top duration-300">
+          <div className="cp-success-banner px-6 py-3 flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/40">
+              <div className="w-8 h-8 rounded-full cp-success-icon flex items-center justify-center">
                 <CheckCircle2 className="w-5 h-5" />
               </div>
               <div>
@@ -1211,7 +1220,7 @@ const ChallengePlayground = () => {
 
         {/* Engine Error Alert Banner */}
         {engineError && (
-          <div className="bg-rose-950/90 border-b border-rose-500/60 px-6 py-3 flex items-center justify-between text-rose-200 text-xs shadow-lg animate-in slide-in-from-top duration-300">
+          <div className="cp-error-banner px-6 py-3 flex items-center justify-between text-xs">
             <div className="flex items-center space-x-3">
               <div className="w-7 h-7 rounded-lg bg-rose-500/20 text-rose-400 flex items-center justify-center border border-rose-500/40 shrink-0">
                 <AlertCircle className="w-4 h-4" />
@@ -1238,7 +1247,7 @@ const ChallengePlayground = () => {
         <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
           
           {/* LEFT PANE: Problem Context & Schema (40%) */}
-          <div className="w-full lg:w-[40%] border-b lg:border-b-0 lg:border-r border-slate-800/90 bg-slate-900/40 p-5 sm:p-6 overflow-y-auto space-y-6">
+          <div className="cp-left-pane w-full lg:w-[40%] border-b lg:border-b-0 lg:border-r border-slate-800/60 p-5 sm:p-6 overflow-y-auto space-y-6">
             
             {/* Problem Statement */}
             <div className="space-y-3">
@@ -1246,7 +1255,7 @@ const ChallengePlayground = () => {
                 <Database className="w-4 h-4 text-cyan-400" />
                 <span>Problem Description</span>
               </div>
-              <div className="bg-slate-950/70 border border-slate-800/90 rounded-2xl p-4 sm:p-5 text-sm text-slate-200 leading-relaxed whitespace-pre-line shadow-inner">
+              <div className="cp-problem-desc rounded-2xl p-4 sm:p-5 text-sm text-slate-200 leading-relaxed whitespace-pre-line">
                 {challenge.description}
               </div>
             </div>
@@ -1258,7 +1267,7 @@ const ChallengePlayground = () => {
                   href={challenge.leetcode_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-amber-500/10 to-orange-500/15 hover:from-amber-500/25 hover:to-orange-500/25 border border-amber-500/30 hover:border-amber-400 text-amber-300 text-xs font-extrabold flex items-center justify-between shadow-lg shadow-amber-500/5 group transition duration-200"
+                  className="cp-leetcode-link w-full py-3 px-4 rounded-2xl text-xs font-extrabold flex items-center justify-between group transition duration-200"
                 >
                   <div className="flex items-center space-x-2.5">
                     <span className="p-1.5 rounded-lg bg-amber-500/20 text-amber-400 group-hover:scale-110 transition-transform">
@@ -1273,7 +1282,7 @@ const ChallengePlayground = () => {
               </div>
             )}
 
-            {/* Database Schema & Seed Data Table (Dynamically Inspected from init_sql) */}
+            {/* Database Schema & Seed Data Table */}
             {schemaData && (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -1284,10 +1293,10 @@ const ChallengePlayground = () => {
                   <span className="text-[11px] text-slate-500 font-mono">WASM SQLite</span>
                 </div>
 
-                <div className="bg-slate-950 border border-slate-800/90 rounded-xl overflow-hidden shadow-lg">
+                <div className="cp-schema-table rounded-xl overflow-hidden">
                   <div className="overflow-x-auto max-h-56">
                     <table className="w-full text-left text-xs font-mono">
-                      <thead className="bg-slate-900/90 text-cyan-400 border-b border-slate-800 sticky top-0">
+                      <thead className="cp-schema-thead sticky top-0">
                         <tr>
                           {schemaData.columns.map((col, idx) => (
                             <th key={idx} className="py-2.5 px-3 font-semibold whitespace-nowrap">
@@ -1296,9 +1305,9 @@ const ChallengePlayground = () => {
                           ))}
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-800/60 text-slate-300">
+                      <tbody className="divide-y divide-slate-800/40 text-slate-300">
                         {schemaData.sampleRows.map((row, rIdx) => (
-                          <tr key={rIdx} className="hover:bg-slate-900/50 transition">
+                          <tr key={rIdx} className="hover:bg-slate-800/30 transition">
                             {row.map((cell, cIdx) => (
                               <td key={cIdx} className="py-2 px-3 whitespace-nowrap">
                                 {cell === null ? <span className="text-slate-500 italic">NULL</span> : String(cell)}
@@ -1320,7 +1329,7 @@ const ChallengePlayground = () => {
                   <HelpCircle className="w-4 h-4 text-amber-400" />
                   <span>Schema Context</span>
                 </span>
-                <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs font-mono text-cyan-300">
+                <div className="cp-schema-hint p-3 rounded-xl text-xs font-mono">
                   {challenge.schema_hint}
                 </div>
               </div>
@@ -1331,7 +1340,7 @@ const ChallengePlayground = () => {
           <div className="w-full lg:w-[60%] flex flex-col bg-slate-950 justify-between">
             
             {/* Top Editor Toolbar & Action Buttons */}
-            <div className="bg-slate-900/90 border-b border-slate-800 px-4 py-2.5 flex items-center justify-between flex-wrap gap-2">
+            <div className="cp-editor-toolbar px-4 py-2.5 flex items-center justify-between flex-wrap gap-2">
               <div className="flex items-center space-x-3">
                 <div className="flex items-center space-x-1.5">
                   <span className="w-3 h-3 rounded-full bg-rose-500/80" />
@@ -1345,14 +1354,14 @@ const ChallengePlayground = () => {
                 {/* Prominent SQL Workspace Countdown Timer */}
                 <div 
                   title={isSqlLocked ? 'Time expired: SQL Editor is locked' : 'SQL Workspace Challenge Timer'}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-mono font-bold flex items-center space-x-1.5 border transition-all ${
+                  className={`cp-sql-timer px-2.5 py-1 rounded-lg text-xs font-mono font-bold flex items-center space-x-1.5 transition-all ${
                     isSqlLocked
-                      ? 'bg-rose-950/80 text-rose-300 border-rose-500/60 shadow-lg shadow-rose-950/40'
+                      ? 'cp-sql-timer-locked'
                       : sqlTimeLeft <= 60
-                      ? 'bg-rose-500/20 text-rose-400 border-rose-500/50 animate-pulse'
+                      ? 'cp-sql-timer-critical'
                       : sqlTimeLeft <= 120
-                      ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                      : 'bg-slate-800/90 text-cyan-300 border-slate-700/80'
+                      ? 'cp-sql-timer-warning'
+                      : 'cp-sql-timer-safe'
                   }`}
                 >
                   <Clock className="w-3.5 h-3.5" />
@@ -1365,7 +1374,7 @@ const ChallengePlayground = () => {
                   onClick={handleEditorReset}
                   disabled={isSqlLocked}
                   title="Reset to Starter Code"
-                  className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="cp-toolbar-btn p-2 rounded-lg transition disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                 </button>
@@ -1373,12 +1382,10 @@ const ChallengePlayground = () => {
                 <button
                   onClick={handleRunCode}
                   disabled={isRunning || !engineReady || Boolean(engineError) || isSqlLocked}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold shadow flex items-center space-x-1.5 transition ${
-                    isSqlLocked
-                      ? 'bg-slate-800/60 text-slate-500 border border-slate-800 cursor-not-allowed opacity-50'
-                      : engineError
-                      ? 'bg-rose-950/60 text-rose-300 border border-rose-500/50 cursor-not-allowed opacity-90'
-                      : 'bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 disabled:opacity-50'
+                  className={`cp-btn-run px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center space-x-1.5 transition ${
+                    isSqlLocked || engineError
+                      ? 'opacity-50 cursor-not-allowed'
+                      : ''
                   }`}
                 >
                   {isRunning ? (
@@ -1406,12 +1413,10 @@ const ChallengePlayground = () => {
                 <button
                   onClick={handleSubmitSolution}
                   disabled={isRunning || !engineReady || Boolean(engineError) || isSqlLocked}
-                  className={`px-4 py-1.5 rounded-lg text-xs font-bold shadow-lg flex items-center space-x-1.5 transition ${
-                    isSqlLocked
-                      ? 'bg-slate-800/60 text-slate-500 border border-slate-800 cursor-not-allowed opacity-50'
-                      : engineError
-                      ? 'bg-rose-950/60 text-rose-300 border border-rose-500/50 cursor-not-allowed opacity-90'
-                      : 'bg-gradient-to-r from-emerald-600 via-emerald-500 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white shadow-emerald-600/30 disabled:opacity-50'
+                  className={`cp-btn-submit px-4 py-1.5 rounded-lg text-xs font-bold flex items-center space-x-1.5 transition ${
+                    isSqlLocked || engineError
+                      ? 'opacity-50 cursor-not-allowed'
+                      : ''
                   }`}
                 >
                   {isRunning ? (
@@ -1441,7 +1446,7 @@ const ChallengePlayground = () => {
             {/* Interactive CodeMirror Editor with Anti-Cheat Paste Interceptor & Lock */}
             <div 
               onPasteCapture={handlePaste}
-              className="flex-1 min-h-[260px] bg-[#282c34] overflow-y-auto relative"
+              className="cp-editor-area flex-1 min-h-[260px] overflow-y-auto relative"
             >
               {isSqlLocked && (
                 <div className="absolute top-3 right-3 z-10 px-3 py-1 rounded-lg bg-rose-950/90 border border-rose-500/60 text-rose-300 text-xs font-bold flex items-center space-x-1.5 shadow-lg backdrop-blur-md">
@@ -1462,17 +1467,17 @@ const ChallengePlayground = () => {
             </div>
 
             {/* Bottom Tabbed Terminal Results Area */}
-            <div className="h-64 border-t border-slate-800/90 bg-slate-900/95 flex flex-col">
+            <div className="cp-terminal h-64 flex flex-col">
               
               {/* Sub-tab Navigation Headers */}
-              <div className="flex items-center justify-between border-b border-slate-800 px-4 bg-slate-950/60">
+              <div className="cp-terminal-tabs flex items-center justify-between px-4">
                 <div className="flex items-center space-x-1">
                   <button
                     onClick={() => setEditorSubTab('output')}
-                    className={`px-3 py-2 text-xs font-bold border-b-2 transition flex items-center space-x-1.5 ${
+                    className={`cp-terminal-tab px-3 py-2 text-xs font-bold border-b-2 transition flex items-center space-x-1.5 ${
                       editorSubTab === 'output'
-                        ? 'border-cyan-400 text-cyan-400'
-                        : 'border-transparent text-slate-400 hover:text-slate-200'
+                        ? 'cp-terminal-tab-active-cyan'
+                        : 'cp-terminal-tab-inactive'
                     }`}
                   >
                     <TableIcon className="w-3.5 h-3.5" />
@@ -1481,10 +1486,10 @@ const ChallengePlayground = () => {
 
                   <button
                     onClick={() => setEditorSubTab('expected')}
-                    className={`px-3 py-2 text-xs font-bold border-b-2 transition flex items-center space-x-1.5 ${
+                    className={`cp-terminal-tab px-3 py-2 text-xs font-bold border-b-2 transition flex items-center space-x-1.5 ${
                       editorSubTab === 'expected'
-                        ? 'border-amber-400 text-amber-400'
-                        : 'border-transparent text-slate-400 hover:text-slate-200'
+                        ? 'cp-terminal-tab-active-amber'
+                        : 'cp-terminal-tab-inactive'
                     }`}
                   >
                     <CheckCircle2 className="w-3.5 h-3.5" />
@@ -1493,10 +1498,10 @@ const ChallengePlayground = () => {
 
                   <button
                     onClick={() => setEditorSubTab('console')}
-                    className={`px-3 py-2 text-xs font-bold border-b-2 transition flex items-center space-x-1.5 ${
+                    className={`cp-terminal-tab px-3 py-2 text-xs font-bold border-b-2 transition flex items-center space-x-1.5 ${
                       editorSubTab === 'console'
-                        ? 'border-indigo-400 text-indigo-300'
-                        : 'border-transparent text-slate-400 hover:text-slate-200'
+                        ? 'cp-terminal-tab-active-violet'
+                        : 'cp-terminal-tab-inactive'
                     }`}
                   >
                     <TerminalIcon className="w-3.5 h-3.5" />
@@ -1525,7 +1530,7 @@ const ChallengePlayground = () => {
                         <p className="text-[11px] leading-relaxed">{results.error}</p>
                       </div>
                     ) : results?.studentOutput?.values?.length > 0 ? (
-                      <table className="w-full text-left border border-slate-800">
+                      <table className="w-full text-left border border-slate-800 rounded-lg overflow-hidden">
                         <thead className="bg-slate-950 text-cyan-400 border-b border-slate-800 sticky top-0">
                           <tr>
                             {results.studentOutput.columns.map((col, idx) => (
@@ -1561,7 +1566,7 @@ const ChallengePlayground = () => {
                 {editorSubTab === 'expected' && (
                   <div>
                     {results?.expectedOutput?.values?.length > 0 ? (
-                      <table className="w-full text-left border border-slate-800">
+                      <table className="w-full text-left border border-slate-800 rounded-lg overflow-hidden">
                         <thead className="bg-slate-950 text-amber-400 border-b border-slate-800 sticky top-0">
                           <tr>
                             {results.expectedOutput.columns.map((col, idx) => (
@@ -1600,14 +1605,14 @@ const ChallengePlayground = () => {
                       logs.map((log, idx) => (
                         <div
                           key={idx}
-                          className={`p-2.5 rounded-xl text-xs leading-relaxed flex items-start space-x-2.5 ${
+                          className={`cp-log-entry p-2.5 rounded-xl text-xs leading-relaxed flex items-start space-x-2.5 ${
                             log.type === 'error'
-                              ? 'bg-rose-950/50 text-rose-200 border border-rose-500/40 shadow-sm'
+                              ? 'cp-log-error'
                               : log.type === 'warn'
-                              ? 'bg-amber-950/50 text-amber-200 border border-amber-500/40 shadow-sm'
+                              ? 'cp-log-warn'
                               : log.type === 'success'
-                              ? 'bg-emerald-950/50 text-emerald-200 border border-emerald-500/40 shadow-sm'
-                              : 'bg-slate-950/80 text-slate-300 border border-slate-800'
+                              ? 'cp-log-success'
+                              : 'cp-log-info'
                           }`}
                         >
                           {log.type === 'error' ? (
