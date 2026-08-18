@@ -32,10 +32,10 @@ const StudentDashboard = () => {
     const fetchStudentPortalData = async () => {
       setLoading(true);
       try {
-        // Fetch 21-Day challenges live from Supabase
+        // Fetch 21-Day challenges live from Supabase (lean payload)
         const { data: challengesData } = await supabase
           .from('challenges')
-          .select('*')
+          .select('id, day_number, title, difficulty, points, is_unlocked')
           .order('day_number', { ascending: true });
 
         setChallenges(challengesData || []);

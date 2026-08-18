@@ -39,7 +39,7 @@ const ContestHub = () => {
       try {
         const { data, error: fetchErr } = await supabase
           .from('challenges')
-          .select('*')
+          .select('id, day_number, title, description, difficulty, points, is_unlocked, video_url, leetcode_url')
           .order('day_number', { ascending: true });
 
         if (fetchErr) throw fetchErr;

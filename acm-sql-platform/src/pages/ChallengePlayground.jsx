@@ -6,7 +6,7 @@ import { oneDark } from '@codemirror/theme-one-dark';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { executeChallenge, executeDryRun, getSqlInstance, inspectSchema } from '../lib/sqlEngine';
-import AiMentor from '../components/AiMentor';
+const AiMentor = React.lazy(() => import('../components/AiMentor'));
 import { 
   Play, 
   Send, 
@@ -817,6 +817,7 @@ const ChallengePlayground = () => {
                   title={`Day ${challenge.day_number} Video Lesson`}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
+                  loading="lazy"
                   className="w-full h-full border-0"
                 />
               </div>
@@ -1639,10 +1640,12 @@ const ChallengePlayground = () => {
       </div>
 
       {/* Embedded Floating AI Mentor Drawer */}
-      <AiMentor 
-        problemContext={challenge.description}
-        studentCode={code}
-      />
+      <React.Suspense fallback={null}>
+        <AiMentor 
+          problemContext={challenge.description}
+          studentCode={code}
+        />
+      </React.Suspense>
 
     </div>
   );

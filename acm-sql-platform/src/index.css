@@ -55,6 +55,8 @@
   transform-style: preserve-3d;
   animation: dbRotateY 10s linear infinite;
   position: relative;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
 }
 
 .db-face {
@@ -113,6 +115,8 @@
   pointer-events: none;
   z-index: 0;
   overflow: hidden;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
 }
 
 .logo-breathe { animation: logoBreathe 3s ease-in-out infinite; }
@@ -152,6 +156,8 @@
   overflow: hidden;
   animation: cardBreath 4s ease-in-out infinite;
   transition: transform 0.25s ease, box-shadow 0.25s ease;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
 }
 .sprint-card-unlocked::before {
   content: '';
@@ -161,6 +167,8 @@
   animation: cardSweep 7s ease-in-out infinite;
   pointer-events: none;
   z-index: 1;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
 }
 .sprint-card-unlocked:hover {
   transform: translateY(-4px) scale(1.02);
@@ -322,6 +330,8 @@
 .lb-row-sweep {
   position: relative;
   overflow: hidden;
+  content-visibility: auto;
+  contain-intrinsic-size: 0 56px;
 }
 .lb-row-sweep::after {
   content: '';
@@ -363,6 +373,9 @@
   pointer-events: none;
   z-index: 0;
   animation: chBgDrift1 20s ease-in-out infinite;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  contain: strict;
 }
 .ch-page-bg::after {
   content: '';
@@ -375,6 +388,9 @@
   pointer-events: none;
   z-index: 0;
   animation: chBgDrift2 25s ease-in-out infinite;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  contain: strict;
 }
 
 @keyframes chBgDrift1 {
@@ -552,6 +568,8 @@
   animation: chCardEntrance 0.5s ease-out both;
   position: relative;
   overflow: hidden;
+  content-visibility: auto;
+  contain-intrinsic-size: 0 280px;
 }
 
 @keyframes chCardEntrance {
@@ -574,6 +592,8 @@
     0 4px 20px rgba(0, 0, 0, 0.25);
   transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
   animation: chCardEntrance 0.5s ease-out both, chActiveBreath 4s ease-in-out infinite;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
 }
 
 @keyframes chActiveBreath {
@@ -608,6 +628,8 @@
   pointer-events: none;
   z-index: 1;
   border-radius: inherit;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
 }
 
 @keyframes chCardSweep {
@@ -989,6 +1011,9 @@
   background: radial-gradient(ellipse at center, rgba(56, 97, 251, 0.05) 0%, transparent 70%);
   pointer-events: none;
   z-index: 0;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  contain: strict;
 }
 .cp-page-bg::after {
   content: '';
@@ -1000,6 +1025,9 @@
   background: radial-gradient(ellipse at center, rgba(139, 92, 246, 0.04) 0%, transparent 70%);
   pointer-events: none;
   z-index: 0;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  contain: strict;
 }
 
 /* ──── Fade-in animation ──── */

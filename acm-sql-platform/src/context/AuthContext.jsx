@@ -18,101 +18,118 @@ export const AuthProvider = ({ children }) => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Reliable fetchProfile helper: strictly reads real DB profile from Supabase
+  // In-flight fetch cache to prevent duplicate concurrent network requests
+  const inFlightProfileRef = React.useRef(new Map());
+
+  // Reliable fetchProfile helper: strictly reads real DB profile from Supabase with request de-duplication
   const fetchProfile = useCallback(async (userId, currentUser = null) => {
     if (!userId) {
       setProfile(null);
       return null;
     }
 
-    try {
-      // 1. Fetch live profile row from Supabase
-      const { data, error, status } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .maybeSingle();
-
-      // If profile exists in the database, prioritize it and sync state
-      if (!error && data) {
-        setProfile(data);
-        return data;
-      }
-
-      // 2. Only if the row genuinely doesn't exist in Supabase (406 or PGRST116), perform insert
-      const isNotFound = !data && (status === 406 || error?.code === 'PGRST116' || !error);
-
-      if (isNotFound) {
-        console.warn(`Profile record missing for user ${userId}. Creating initial profile...`);
-
-        let userEmail = currentUser?.email || '';
-        let userName = currentUser?.user_metadata?.full_name || 'Student';
-
-        if (!userEmail) {
-          const { data: authUser } = await supabase.auth.getUser();
-          if (authUser?.user) {
-            userEmail = authUser.user.email || '';
-            userName = authUser.user.user_metadata?.full_name || userName;
-          }
-        }
-
-        const newProfilePayload = {
-          id: userId,
-          email: userEmail,
-          full_name: userName,
-          role: 'student',
-          total_points: 0,
-          streak_count: 0,
-        };
-
-        const { data: insertedData, error: insertError } = await supabase
-          .from('profiles')
-          .insert([newProfilePayload])
-          .select()
-          .single();
-
-        if (insertError) {
-          console.error('Initial profile insertion error:', insertError.message);
-          // If insert failed due to duplicate/conflict, retry fetch once
-          const { data: retryData } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', userId)
-            .maybeSingle();
-
-          if (retryData) {
-            setProfile(retryData);
-            return retryData;
-          }
-        }
-
-        const resolved = insertedData || newProfilePayload;
-        setProfile(resolved);
-        return resolved;
-      }
-
-      console.error('Error fetching profile from Supabase:', error?.message || error);
-      return null;
-    } catch (err) {
-      console.error('Unexpected error in fetchProfile:', err);
-      return null;
+    // Reuse existing in-flight promise if already fetching for this user
+    if (inFlightProfileRef.current.has(userId)) {
+      return inFlightProfileRef.current.get(userId);
     }
+
+    const fetchPromise = (async () => {
+      try {
+        // 1. Fetch live profile row from Supabase
+        const { data, error, status } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .maybeSingle();
+
+        // If profile exists in the database, prioritize it and sync state
+        if (!error && data) {
+          setProfile(data);
+          return data;
+        }
+
+        // 2. Only if the row genuinely doesn't exist in Supabase (406 or PGRST116), perform insert
+        const isNotFound = !data && (status === 406 || error?.code === 'PGRST116' || !error);
+
+        if (isNotFound) {
+          console.warn(`Profile record missing for user ${userId}. Creating initial profile...`);
+
+          let userEmail = currentUser?.email || '';
+          let userName = currentUser?.user_metadata?.full_name || 'Student';
+
+          if (!userEmail) {
+            const { data: authUser } = await supabase.auth.getUser();
+            if (authUser?.user) {
+              userEmail = authUser.user.email || '';
+              userName = authUser.user.user_metadata?.full_name || userName;
+            }
+          }
+
+          const newProfilePayload = {
+            id: userId,
+            email: userEmail,
+            full_name: userName,
+            role: 'student',
+            total_points: 0,
+            streak_count: 0,
+          };
+
+          const { data: insertedData, error: insertError } = await supabase
+            .from('profiles')
+            .insert([newProfilePayload])
+            .select()
+            .single();
+
+          if (insertError) {
+            console.error('Initial profile insertion error:', insertError.message);
+            // If insert failed due to duplicate/conflict, retry fetch once
+            const { data: retryData } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', userId)
+              .maybeSingle();
+
+            if (retryData) {
+              setProfile(retryData);
+              return retryData;
+            }
+          }
+
+          const resolved = insertedData || newProfilePayload;
+          setProfile(resolved);
+          return resolved;
+        }
+
+        console.error('Error fetching profile from Supabase:', error?.message || error);
+        return null;
+      } catch (err) {
+        console.error('Unexpected error in fetchProfile:', err);
+        return null;
+      } finally {
+        inFlightProfileRef.current.delete(userId);
+      }
+    })();
+
+    inFlightProfileRef.current.set(userId, fetchPromise);
+    return fetchPromise;
   }, []);
 
   // Initial session check, auth listener, and Realtime replication subscription
   useEffect(() => {
     let mounted = true;
     let realtimeChannel = null;
+    let currentSubscribedUserId = null;
 
     // Helper: subscribe to PostgreSQL changes on public.profiles for the logged in user
     const setupRealtimeSubscription = (userId) => {
-      if (!userId) return;
+      if (!userId || currentSubscribedUserId === userId) return;
 
       if (realtimeChannel) {
         supabase.removeChannel(realtimeChannel);
         realtimeChannel = null;
       }
 
+      currentSubscribedUserId = userId;
       realtimeChannel = supabase
         .channel(`profile-realtime-${userId}`)
         .on(
@@ -174,16 +191,19 @@ export const AuthProvider = ({ children }) => {
       async (event, currentSession) => {
         if (!mounted) return;
 
+        // Skip redundant execution for INITIAL_SESSION since initializeAuth handles it
+        if (event === 'INITIAL_SESSION') return;
+
         setSession(currentSession);
         const currentUser = currentSession?.user ?? null;
         setUser(currentUser);
 
         if (currentUser) {
-          // If we already have the profile with matching id, keep it while refreshing in background
           await fetchProfile(currentUser.id, currentUser);
           setupRealtimeSubscription(currentUser.id);
         } else {
           setProfile(null);
+          currentSubscribedUserId = null;
           if (realtimeChannel) {
             supabase.removeChannel(realtimeChannel);
             realtimeChannel = null;
