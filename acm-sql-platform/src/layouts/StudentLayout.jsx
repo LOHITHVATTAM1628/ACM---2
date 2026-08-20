@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useEvent } from '../context/EventContext';
 import { 
   Database, 
   Flame, 
@@ -13,11 +14,14 @@ import {
   Sparkles,
   ChevronDown,
   LayoutDashboard,
-  User
+  User,
+  AlertTriangle,
+  Lock
 } from 'lucide-react';
 
 const StudentLayout = () => {
   const { user, profile, logout } = useAuth();
+  const { isEventClosed } = useEvent();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
@@ -34,13 +38,27 @@ const StudentLayout = () => {
 
   const studentNavLinks = [
     { name: 'Dashboard', path: '/student/dashboard', icon: LayoutDashboard },
-    { name: '21-Day Contest', path: '/student/contest', icon: Calendar, highlight: true },
+    { name: '21-Day Contest', path: '/student/contest', icon: Calendar, highlight: !isEventClosed },
     { name: 'Leaderboard', path: '/student/leaderboard', icon: Trophy },
   ];
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-slate-950">
       
+      {/* Event Closed Kill-Switch Global Banner */}
+      {isEventClosed && (
+        <div className="bg-gradient-to-r from-rose-950 via-rose-900 to-rose-950 border-b border-rose-500/40 px-4 py-2 text-center text-xs font-bold text-rose-200 flex items-center justify-center space-x-2 animate-in slide-in-from-top duration-300 z-50">
+          <AlertTriangle className="w-4 h-4 text-rose-400 animate-bounce shrink-0" />
+          <span>
+            <strong>21-Day Program Notice:</strong> The active 21-day contest has been concluded/paused by Chapter Leads. Challenge submissions are currently disabled.
+          </span>
+          <span className="hidden sm:inline-flex items-center space-x-1 px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[10px] uppercase font-black">
+            <Lock className="w-2.5 h-2.5" />
+            <span>Closed</span>
+          </span>
+        </div>
+      )}
+
       {/* Student Top Navigation Bar */}
       <nav className="sticky top-0 z-50 w-full border-b border-slate-800/80 bg-slate-900/85 backdrop-blur-md transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { EventProvider } from './context/EventContext';
 import { Loader2 } from 'lucide-react';
 
 // Route Guards
@@ -62,56 +63,58 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <Routes>
-          {/* Public Authentication Route */}
-          <Route path="/auth" element={<Auth />} />
+        <EventProvider>
+          <Routes>
+            {/* Public Authentication Route */}
+            <Route path="/auth" element={<Auth />} />
 
-          {/* Root Redirector */}
-          <Route path="/" element={<RootRedirect />} />
+            {/* Root Redirector */}
+            <Route path="/" element={<RootRedirect />} />
 
-          {/* Legacy Aliases for seamless backwards compatibility */}
-          <Route path="/contest" element={<Navigate to="/student/contest" replace />} />
-          <Route path="/contest/day/:dayNumber" element={<Navigate to="/student/contest/day/:dayNumber" replace />} />
-          <Route path="/leaderboard" element={<Navigate to="/student/leaderboard" replace />} />
+            {/* Legacy Aliases for seamless backwards compatibility */}
+            <Route path="/contest" element={<Navigate to="/student/contest" replace />} />
+            <Route path="/contest/day/:dayNumber" element={<Navigate to="/student/contest/day/:dayNumber" replace />} />
+            <Route path="/leaderboard" element={<Navigate to="/student/leaderboard" replace />} />
 
-          {/* STUDENT PORTAL (Strictly guarded by StudentRoute & StudentLayout) */}
-          <Route
-            path="/student"
-            element={
-              <StudentRoute>
-                <StudentLayout />
-              </StudentRoute>
-            }
-          >
-            <Route index element={<Navigate to="/student/dashboard" replace />} />
-            <Route path="dashboard" element={<StudentDashboard />} />
-            <Route path="contest" element={<ContestHub />} />
-            <Route path="contest/day/:dayNumber" element={<ChallengePlayground />} />
-            <Route path="leaderboard" element={<Leaderboard />} />
-            <Route path="*" element={<Navigate to="/student/dashboard" replace />} />
-          </Route>
+            {/* STUDENT PORTAL (Strictly guarded by StudentRoute & StudentLayout) */}
+            <Route
+              path="/student"
+              element={
+                <StudentRoute>
+                  <StudentLayout />
+                </StudentRoute>
+              }
+            >
+              <Route index element={<Navigate to="/student/dashboard" replace />} />
+              <Route path="dashboard" element={<StudentDashboard />} />
+              <Route path="contest" element={<ContestHub />} />
+              <Route path="contest/day/:dayNumber" element={<ChallengePlayground />} />
+              <Route path="leaderboard" element={<Leaderboard />} />
+              <Route path="*" element={<Navigate to="/student/dashboard" replace />} />
+            </Route>
 
-          {/* ADMIN PORTAL (Strictly guarded by AdminRoute & AdminLayout) */}
-          <Route
-            path="/admin"
-            element={
-              <AdminRoute>
-                <AdminLayout />
-              </AdminRoute>
-            }
-          >
-            <Route index element={<Navigate to="/admin/dashboard" replace />} />
-            <Route path="dashboard" element={<AdminDashboard />} />
-            <Route path="challenges" element={<ChallengeManager />} />
-            <Route path="quizzes" element={<QuizManager />} />
-            <Route path="leaderboard" element={<Leaderboard />} />
-            <Route path="students" element={<StudentManager />} />
-            <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
-          </Route>
+            {/* ADMIN PORTAL (Strictly guarded by AdminRoute & AdminLayout) */}
+            <Route
+              path="/admin"
+              element={
+                <AdminRoute>
+                  <AdminLayout />
+                </AdminRoute>
+              }
+            >
+              <Route index element={<Navigate to="/admin/dashboard" replace />} />
+              <Route path="dashboard" element={<AdminDashboard />} />
+              <Route path="challenges" element={<ChallengeManager />} />
+              <Route path="quizzes" element={<QuizManager />} />
+              <Route path="leaderboard" element={<Leaderboard />} />
+              <Route path="students" element={<StudentManager />} />
+              <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
+            </Route>
 
-          {/* Global Fallback */}
-          <Route path="*" element={<RootRedirect />} />
-        </Routes>
+            {/* Global Fallback */}
+            <Route path="*" element={<RootRedirect />} />
+          </Routes>
+        </EventProvider>
       </AuthProvider>
     </Router>
   );

@@ -5,8 +5,9 @@ import { sql } from '@codemirror/lang-sql';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { useEvent } from '../context/EventContext';
 import { executeChallenge, executeDryRun, getSqlInstance, inspectSchema } from '../lib/sqlEngine';
-import AiMentor from '../components/AiMentor';
+import ThankYouScreen from '../components/ThankYouScreen';
 import { 
   Play, 
   Send, 
@@ -31,7 +32,8 @@ import {
   FileQuestion,
   Code2,
   ExternalLink,
-  Clock
+  Clock,
+  ShieldAlert
 } from 'lucide-react';
 
 function getYouTubeEmbedUrl(url) {
@@ -46,6 +48,7 @@ function getYouTubeEmbedUrl(url) {
 const ChallengePlayground = () => {
   const { dayNumber } = useParams();
   const { user, profile, refreshProfile } = useAuth();
+  const { isEventClosed } = useEvent();
 
   // Anti-Cheat: Internal clipboard tracker for on-page text copying
   const internalClipboard = useRef("");
@@ -251,9 +254,9 @@ const ChallengePlayground = () => {
       const questionsList = qData || [];
       setQuizQuestions(questionsList);
 
-      // 2. Check if user already submitted this quiz in quiz_attempts
+      // 2. Check if user already submitted this quiz in quiz_attempts using challenge_id (UUID)
       const currentUserId = user?.id || profile?.id;
-      if (currentUserId) {
+      if (currentUserId && challengeId) {
         const { data: attemptData, error: attErr } = await supabase
           .from('quiz_attempts')
           .select('*')
@@ -406,7 +409,7 @@ const ChallengePlayground = () => {
 
     setIsSavingQuiz(true);
     try {
-      // 1. Fully awaited INSERT into quiz_attempts with strict validUserId
+      // 1. Fully awaited INSERT into quiz_attempts with strict validUserId and challenge_id (UUID)
       const attemptInsertPayload = {
         user_id: validUserId,
         challenge_id: challenge.id,
@@ -470,6 +473,10 @@ const ChallengePlayground = () => {
   };
 
   const handleStartQuiz = () => {
+    if (quizSubmitted || quizAttempt) {
+      alert("⚠️ 1-Time Attempt Limit: You have already completed this Knowledge Check.");
+      return;
+    }
     const duration = Number(challenge?.quiz_timer_seconds) || 10;
     setIsQuizActive(true);
     setCurrentQuestionIdx(0);
@@ -550,6 +557,13 @@ const ChallengePlayground = () => {
 
   // Submit & Auto-grade solution ("Submit Solution")
   const handleSubmitSolution = async () => {
+    if (isEventClosed) {
+      const closedMsg = "The 21-day event has been concluded by the administrators. Submissions are closed.";
+      setResults({ studentOutput: { columns: [], values: [] }, error: closedMsg });
+      setEditorSubTab('console');
+      setLogs((prev) => [...prev, { type: 'error', text: `[Submission Locked] ${closedMsg}` }]);
+      return;
+    }
     if (!challenge) {
       console.warn("No active challenge loaded.");
       return;
@@ -648,6 +662,11 @@ const ChallengePlayground = () => {
       alert("⚠️ Anti-Cheat: You cannot paste code from external sources. Please type your query or copy from the problem description.");
     }
   };
+
+  // If kill switch is active, immediately lock challenge playground and show Thank You screen
+  if (isEventClosed) {
+    return <ThankYouScreen />;
+  }
 
   // Loading State
   if (loading) {
@@ -1405,17 +1424,22 @@ const ChallengePlayground = () => {
 
                 <button
                   onClick={handleSubmitSolution}
-                  disabled={isRunning || !engineReady || Boolean(engineError) || isSqlLocked}
+                  disabled={isRunning || !engineReady || Boolean(engineError) || isSqlLocked || isEventClosed}
                   className={`px-4 py-1.5 rounded-lg text-xs font-bold shadow-lg flex items-center space-x-1.5 transition ${
-                    isSqlLocked
+                    isEventClosed
+                      ? 'bg-rose-950/80 text-rose-300 border border-rose-500/60 cursor-not-allowed opacity-90'
+                      : isSqlLocked
                       ? 'bg-slate-800/60 text-slate-500 border border-slate-800 cursor-not-allowed opacity-50'
                       : engineError
                       ? 'bg-rose-950/60 text-rose-300 border border-rose-500/50 cursor-not-allowed opacity-90'
                       : 'bg-gradient-to-r from-emerald-600 via-emerald-500 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white shadow-emerald-600/30 disabled:opacity-50'
                   }`}
+                  title={isEventClosed ? 'Submissions are disabled: 21-Day program is closed' : 'Submit Solution'}
                 >
                   {isRunning ? (
                     <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
+                  ) : isEventClosed ? (
+                    <ShieldAlert className="w-3.5 h-3.5 text-rose-400" />
                   ) : engineError ? (
                     <AlertCircle className="w-3.5 h-3.5 text-rose-400" />
                   ) : !engineReady ? (
@@ -1424,7 +1448,9 @@ const ChallengePlayground = () => {
                     <Send className="w-3.5 h-3.5 text-white" />
                   )}
                   <span>
-                    {isSqlLocked
+                    {isEventClosed
+                      ? 'Closed by Admin'
+                      : isSqlLocked
                       ? 'Locked'
                       : engineError
                       ? 'Engine Error (Check Console)'
@@ -1632,12 +1658,6 @@ const ChallengePlayground = () => {
         </div>
 
       </div>
-
-      {/* Embedded Floating AI Mentor Drawer */}
-      <AiMentor 
-        problemContext={challenge.description}
-        studentCode={code}
-      />
 
     </div>
   );

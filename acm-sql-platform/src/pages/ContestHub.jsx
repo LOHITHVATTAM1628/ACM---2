@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { useEvent } from '../context/EventContext';
 import { 
   Flame, 
   Trophy, 
@@ -18,11 +19,14 @@ import {
   AlertCircle,
   Unlock,
   Video,
-  ExternalLink
+  ExternalLink,
+  ShieldAlert
 } from 'lucide-react';
+import ThankYouScreen from '../components/ThankYouScreen';
 
 const ContestHub = () => {
   const { profile } = useAuth();
+  const { isEventClosed } = useEvent();
   const navigate = useNavigate();
   const [challenges, setChallenges] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -55,8 +59,13 @@ const ContestHub = () => {
     fetchChallenges();
   }, []);
 
-  // Strict dynamic status: locked/unlocked state depends strictly on database `is_unlocked`
+  // Strict dynamic status: locked/unlocked state depends on database is_unlocked and global kill switch
   const getStatus = (challenge) => {
+    if (isEventClosed) {
+      const dayNum = Number(challenge.day_number);
+      if (currentStreak >= dayNum) return 'completed';
+      return 'locked';
+    }
     if (!challenge.is_unlocked) {
       return 'locked';
     }
@@ -68,6 +77,9 @@ const ContestHub = () => {
   };
 
   const getMotivationalQuote = (streak) => {
+    if (isEventClosed) {
+      return '🛑 The 21-Day SQL Marathon is officially closed by the Chapter Leadership. Submissions are paused.';
+    }
     if (streak >= 21) return '🏆 Legend! You conquered the entire 21-Day SQL Marathon!';
     if (streak >= 14) return '⚡ 2/3 Finished! Your query intuition is sharp as lightning!';
     if (streak >= 7) return '🚀 One full week completed! You have built unbreakable momentum!';
@@ -76,6 +88,10 @@ const ContestHub = () => {
   };
 
   const unlockedCount = challenges.filter(c => c.is_unlocked).length;
+
+  if (isEventClosed) {
+    return <ThankYouScreen />;
+  }
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 py-8 px-4 sm:px-6 lg:px-8 animate-in fade-in duration-300">
@@ -147,6 +163,28 @@ const ContestHub = () => {
             </div>
           </div>
         </div>
+
+        {/* Event Concluded Alert Notification */}
+        {isEventClosed && (
+          <div className="bg-gradient-to-r from-rose-950/80 via-slate-900 to-rose-950/80 border border-rose-500/40 p-6 rounded-3xl shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-in fade-in duration-300">
+            <div className="flex items-center space-x-4">
+              <div className="p-3 rounded-2xl bg-rose-500/20 text-rose-400 border border-rose-500/30 shrink-0">
+                <ShieldAlert className="w-6 h-6 animate-pulse" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-sm font-extrabold text-white flex items-center space-x-2">
+                  <span>21-Day Sprint Submissions Closed</span>
+                  <span className="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 text-[10px] font-black uppercase tracking-wider border border-rose-500/30">
+                    Kill Switch Active
+                  </span>
+                </h3>
+                <p className="text-xs text-slate-300">
+                  The chapter administrators have locked the 21-day contest. No new challenge submissions or XP will be recorded until the event is re-opened.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Loading Spinner */}
         {loading ? (

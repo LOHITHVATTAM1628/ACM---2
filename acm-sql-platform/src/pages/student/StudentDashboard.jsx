@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useEvent } from '../../context/EventContext';
 import { supabase } from '../../lib/supabase';
 import { 
   Flame, 
@@ -15,11 +16,15 @@ import {
   Terminal,
   Loader2,
   Award,
-  Lock
+  Lock,
+  ShieldAlert
 } from 'lucide-react';
+
+import ThankYouScreen from '../../components/ThankYouScreen';
 
 const StudentDashboard = () => {
   const { user, profile } = useAuth();
+  const { isEventClosed } = useEvent();
   const [challenges, setChallenges] = useState([]);
   const [topStudents, setTopStudents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -58,12 +63,17 @@ const StudentDashboard = () => {
     fetchStudentPortalData();
   }, []);
 
+  // When kill switch is active, immediately lock down dashboard and present animated Thank You celebration screen
+  if (isEventClosed) {
+    return <ThankYouScreen />;
+  }
+
   // Compute today's active challenge or next incomplete challenge
   const activeDay = Math.min(Math.max(streak + 1, 1), 21);
   const todaysChallenge = challenges.find(c => Number(c.day_number) === activeDay) || challenges[0];
 
   return (
-    <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-in-up">
+    <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-[fadeIn_0.8s_ease-out]">
       
       {/* Background ACM Chapter Watermark */}
       <div className="absolute top-12 right-0 pointer-events-none select-none opacity-[0.03] text-indigo-200 flex items-center justify-center z-0 overflow-hidden">
@@ -88,10 +98,10 @@ const StudentDashboard = () => {
         </svg>
       </div>
 
-      {/* Hero Welcome Banner */}
-      <div className="relative z-10 rounded-3xl overflow-hidden bg-gradient-to-r from-slate-900 via-indigo-950/80 to-slate-900 border border-slate-800 p-6 sm:p-10 shadow-2xl animate-fade-in-up">
-        <div className="absolute top-0 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 right-10 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+      {/* Hero Welcome Banner (Frosted Glassmorphic Card) */}
+      <div className="relative z-10 rounded-2xl overflow-hidden bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.36)] p-6 sm:p-10 transition-all duration-300">
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 right-10 w-96 h-96 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-3 max-w-2xl">
@@ -105,7 +115,7 @@ const StudentDashboard = () => {
             </h1>
             
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Continue your 21-Day SQL Contest sprint, build your daily streak, and test real PostgreSQL queries with our in-browser WebAssembly engine.
+              Continue your 21-Day SQL Contest, build your daily streak, and sharpen your SQL skills through hands-on challenges in our interactive playground.
             </p>
 
             <div className="pt-2 flex flex-wrap items-center gap-3">
@@ -136,13 +146,20 @@ const StudentDashboard = () => {
                 <p className="text-[11px] text-slate-400 line-clamp-2 mt-1">{todaysChallenge.description}</p>
               </div>
 
-              <Link
-                to={`/student/contest/day/${parseInt(todaysChallenge.day_number, 10) || 1}`}
-                className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white text-xs font-bold flex items-center justify-center space-x-2 shadow-lg shadow-indigo-600/30 transition transform active:scale-95"
-              >
-                <Play className="w-3.5 h-3.5 fill-white" />
-                <span>Solve Day {todaysChallenge.day_number}</span>
-              </Link>
+              {isEventClosed ? (
+                <div className="w-full py-2.5 px-4 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 text-xs font-semibold flex items-center justify-center space-x-2 cursor-not-allowed">
+                  <Lock className="w-3.5 h-3.5 text-slate-500" />
+                  <span>Submissions Closed</span>
+                </div>
+              ) : (
+                <Link
+                  to={`/student/contest/day/${parseInt(todaysChallenge.day_number, 10) || 1}`}
+                  className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white text-xs font-bold flex items-center justify-center space-x-2 shadow-lg shadow-indigo-600/30 transition transform active:scale-95"
+                >
+                  <Play className="w-3.5 h-3.5 fill-white" />
+                  <span>Solve Day {todaysChallenge.day_number}</span>
+                </Link>
+              )}
             </div>
           )}
         </div>

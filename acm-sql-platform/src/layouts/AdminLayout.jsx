@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink, Outlet, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useEvent } from '../context/EventContext';
 import { 
   ShieldCheck, 
   LayoutDashboard, 
@@ -15,11 +16,15 @@ import {
   ArrowLeft,
   ChevronRight,
   Database,
-  Trophy
+  Trophy,
+  Power,
+  Flame,
+  AlertTriangle
 } from 'lucide-react';
 
 const AdminLayout = () => {
   const { user, profile, logout } = useAuth();
+  const { isEventClosed, setIsEventClosed } = useEvent();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -48,12 +53,28 @@ const AdminLayout = () => {
           <span className="text-sm font-black text-white tracking-tight">Admin Console</span>
         </div>
 
-        <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="p-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white"
-        >
-          {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
+        <div className="flex items-center space-x-2">
+          {/* Mobile Kill Switch quick badge */}
+          <button
+            onClick={() => setIsEventClosed(!isEventClosed)}
+            title="Toggle 21-Day Program Kill Switch"
+            className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center space-x-1 border transition-all ${
+              isEventClosed
+                ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 shadow-sm shadow-rose-500/30 animate-pulse'
+                : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+            }`}
+          >
+            <Power className="w-3 h-3" />
+            <span>{isEventClosed ? 'Closed' : 'Live'}</span>
+          </button>
+
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white"
+          >
+            {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
       </header>
 
       {/* Left Sidebar Navigation (Fixed height, independent scroll if needed) */}
@@ -155,7 +176,43 @@ const AdminLayout = () => {
             <span className="text-slate-300 font-medium">Administrator Portal</span>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-4">
+            {/* Global Manual Kill Switch for 21-Day Event */}
+            <div className={`flex items-center space-x-3 px-3 py-1.5 rounded-xl border transition-all ${
+              isEventClosed 
+                ? 'bg-rose-950/40 border-rose-500/50 shadow-lg shadow-rose-950/50' 
+                : 'bg-slate-950/60 border-slate-800'
+            }`}>
+              <div className="flex items-center space-x-2">
+                <span className={`w-2 h-2 rounded-full ${
+                  isEventClosed ? 'bg-rose-500 animate-ping' : 'bg-emerald-400 animate-pulse'
+                }`} />
+                <span className="text-xs font-bold text-slate-300">
+                  21-Day Program:
+                </span>
+                <span className={`text-xs font-extrabold uppercase tracking-wider ${
+                  isEventClosed ? 'text-rose-400' : 'text-emerald-400'
+                }`}>
+                  {isEventClosed ? 'CLOSED (KILLED)' : 'ACTIVE (LIVE)'}
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsEventClosed(!isEventClosed)}
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                  isEventClosed ? 'bg-rose-600' : 'bg-slate-700 hover:bg-slate-600'
+                }`}
+                title={isEventClosed ? 'Click to Re-open 21-Day Program' : 'Click to Kill/Close 21-Day Program (Instant frontend lock)'}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                    isEventClosed ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
+
             <span className="text-xs px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold flex items-center space-x-1">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               <span>Supabase Connected</span>

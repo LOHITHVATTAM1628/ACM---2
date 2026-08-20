@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
+import { useEvent } from '../../context/EventContext';
 import { 
   Terminal, 
   Users, 
@@ -10,13 +11,18 @@ import {
   ArrowRight, 
   CheckCircle2, 
   Clock, 
-  Database,
-  Loader2,
-  TrendingUp,
-  Plus
+  Database, 
+  Loader2, 
+  TrendingUp, 
+  Plus,
+  Power,
+  AlertTriangle,
+  ShieldAlert,
+  Flame
 } from 'lucide-react';
 
 const AdminDashboard = () => {
+  const { isEventClosed, setIsEventClosed } = useEvent();
   const [stats, setStats] = useState({
     challengesCount: 0,
     studentsCount: 0,
@@ -123,6 +129,61 @@ const AdminDashboard = () => {
               <Plus className="w-4 h-4" />
               <span>New Challenge</span>
             </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Manual Kill Switch Executive Control Card */}
+      <div className={`p-5 sm:p-6 rounded-3xl border transition-all duration-300 shadow-xl ${
+        isEventClosed
+          ? 'bg-gradient-to-r from-rose-950/60 via-slate-900 to-rose-950/40 border-rose-500/50 shadow-rose-950/40'
+          : 'bg-slate-900/80 border-slate-800 hover:border-slate-700'
+      }`}>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
+          <div className="flex items-start space-x-4">
+            <div className={`p-3 rounded-2xl border shrink-0 transition-colors ${
+              isEventClosed
+                ? 'bg-rose-500/20 text-rose-400 border-rose-500/40 shadow-lg shadow-rose-500/20 animate-pulse'
+                : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+            }`}>
+              {isEventClosed ? <ShieldAlert className="w-7 h-7" /> : <Power className="w-7 h-7" />}
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center space-x-2 flex-wrap">
+                <h3 className="text-base font-extrabold text-white">
+                  21-Day Sprint Manual Kill Switch
+                </h3>
+                <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${
+                  isEventClosed
+                    ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 animate-pulse'
+                    : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                }`}>
+                  {isEventClosed ? '🛑 Program Terminated / Closed' : '🟢 Program Active / Live'}
+                </span>
+                <span className="text-[10px] font-mono text-slate-500 px-1.5 py-0.5 rounded bg-slate-950/60 border border-slate-800">
+                  Pure Frontend State
+                </span>
+              </div>
+              <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
+                {isEventClosed
+                  ? 'The 21-day contest is currently closed. Student portal contest hub and playground are instantly locked from submissions in real-time.'
+                  : 'The 21-day contest is live and accepting student queries. Flipping this switch will immediately pause all challenges across the student portal.'}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-3 shrink-0 self-end md:self-center">
+            <button
+              onClick={() => setIsEventClosed(!isEventClosed)}
+              className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider flex items-center space-x-2 transition-all transform active:scale-95 shadow-lg ${
+                isEventClosed
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white shadow-emerald-600/30'
+                  : 'bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white shadow-rose-600/40'
+              }`}
+            >
+              <Power className="w-4 h-4" />
+              <span>{isEventClosed ? 'Reactivate 21-Day Program' : 'Emergency Kill Program'}</span>
+            </button>
           </div>
         </div>
       </div>
